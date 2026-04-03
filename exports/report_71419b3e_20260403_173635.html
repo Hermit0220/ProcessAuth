@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProcessAuth Report – 71419b3e</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030712;
+    --surface: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --cyan: #06b6d4;
+    --purple: #8b5cf6;
+    --red: #ef4444;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .page-header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .logo { font-size: 0.75rem; letter-spacing: 0.3em; color: var(--cyan); text-transform: uppercase; margin-bottom: 1rem; }
+  h1 { font-size: 2.25rem; font-weight: 700; background: linear-gradient(135deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .subtitle { color: var(--muted); margin-top: 0.5rem; font-size: 0.9rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    backdrop-filter: blur(16px);
+  }
+  .card h2 { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+  .stat-value { font-size: 2rem; font-weight: 700; color: var(--cyan); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* Score ring */
+  .score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .score-ring-wrap { position: relative; width: 140px; height: 140px; }
+  .score-ring-wrap canvas { position: absolute; top: 0; left: 0; }
+  .score-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-number { font-size: 2.2rem; font-weight: 800; }
+  .score-pct { font-size: 0.8rem; color: var(--muted); }
+
+  /* Timeline */
+  .timeline-list { list-style: none; }
+  .timeline-list li {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .timeline-list li:last-child { border-bottom: none; }
+  .tl-time { color: var(--cyan); font-family: monospace; min-width: 80px; }
+  .tl-type { color: var(--purple); min-width: 120px; }
+  .tl-detail { color: var(--muted); }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); border: 1px solid rgba(234,179,8,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+
+  /* Suspicious table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 500; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Chart area */
+  .chart-container { position: relative; height: 220px; }
+
+  /* Integrity hash */
+  .hash-box {
+    background: rgba(6,182,212,0.06);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--cyan);
+    word-break: break-all;
+    margin-top: 1rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">ProcessAuth · Behavioral Writing Analyzer</div>
+  <h1>Authenticity Analysis Report</h1>
+  <p class="subtitle">Session ID: 71419b3e-ee72-4481-96bb-c563e102939a &nbsp;·&nbsp; Generated 2026-04-03 17:36:35</p>
+</div>
+
+<!-- KPI Row -->
+<div class="grid-4">
+  <div class="card">
+    <h2>Total Words</h2>
+    <div class="stat-value">367</div>
+    <div class="stat-label">across entire document</div>
+  </div>
+  <div class="card">
+    <h2>Typed Words</h2>
+    <div class="stat-value" style="color:var(--green)">105</div>
+    <div class="stat-label">via keyboard</div>
+  </div>
+  <div class="card">
+    <h2>Pasted Words</h2>
+    <div class="stat-value" style="color:var(--yellow)">262</div>
+    <div class="stat-label">detected insertions</div>
+  </div>
+  <div class="card">
+    <h2>Suspicious Events</h2>
+    <div class="stat-value" style="color:var(--red)">2</div>
+    <div class="stat-label">flagged by engine</div>
+  </div>
+</div>
+
+<!-- Score + Chart -->
+<div class="grid-2">
+  <div class="card">
+    <p class="section-title">Authenticity Score</p>
+    <div class="score-section">
+      <div class="score-ring-wrap">
+        <canvas id="scoreRing"></canvas>
+        <div class="score-center">
+          <div class="score-number" style="color:#eab308">72</div>
+          <div class="score-pct">out of 100</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:0.5rem">
+        <span class="badge badge-yellow">Moderate — Review Recommended</span>
+      </div>
+      <table style="margin-top:1rem;font-size:0.8rem">
+        <tr><td style="color:var(--muted)">Total keystrokes</td><td style="text-align:right">526</td></tr>
+        <tr><td style="color:var(--muted)">Backspaces</td><td style="text-align:right">76</td></tr>
+        <tr><td style="color:var(--muted)">Clipboard events</td><td style="text-align:right">2</td></tr>
+        <tr><td style="color:var(--muted)">Total penalty</td><td style="text-align:right;color:var(--red)">-28.0</td></tr>
+        <tr><td style="color:var(--muted)">Avg typing speed</td><td style="text-align:right">294.22 cpm</td></tr>
+        <tr><td style="color:var(--muted)">Session duration</td><td style="text-align:right">5m 44s</td></tr>
+        <tr><td style="color:var(--muted)">Document</td><td style="text-align:right;font-size:0.7rem;color:var(--muted)">TEST DOCUMENT.docx</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="section-title">Typing Speed Timeline</p>
+    <div class="chart-container">
+      <canvas id="speedChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Typing Distribution Chart -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Writing Activity Distribution</p>
+  <div class="chart-container">
+    <canvas id="activityChart"></canvas>
+  </div>
+</div>
+
+<!-- Suspicious Events Table -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Suspicious Insertion Events</p>
+  
+  <table>
+    <thead>
+      <tr><th>Timestamp</th><th>Chars Inserted</th><th>Penalty</th><th>Correlated w/ Clipboard</th><th>Reasons</th></tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td style="font-family:monospace;color:var(--cyan)">17:33:03</td>
+        <td>1003</td>
+        <td style="color:var(--red)">-18.0</td>
+        <td><span class="badge badge-red">Yes</span></td>
+        <td style="color:var(--muted)">very large clipboard content (1003 chars)</td>
+      </tr>
+      
+      <tr>
+        <td style="font-family:monospace;color:var(--cyan)">17:35:12</td>
+        <td>308</td>
+        <td style="color:var(--red)">-10.0</td>
+        <td><span class="badge badge-red">Yes</span></td>
+        <td style="color:var(--muted)">large clipboard content (308 chars)</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+</div>
+
+<!-- Event Timeline -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Event Log (last 50)</p>
+  <ul class="timeline-list">
+    
+  </ul>
+</div>
+
+<!-- Integrity Hash -->
+<div class="card">
+  <p class="section-title">Session Integrity Hash</p>
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem">
+    SHA-256 fingerprint of all event records. Any log tampering changes this value.
+  </p>
+  <div class="hash-box">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+</div>
+
+<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.75rem">
+  ProcessAuth &copy; 2026 · Behavioral Writing Authenticity Analyzer · For authorized use only
+</div>
+
+<script>
+// ── Score ring ────────────────────────────────────────────────────────────────
+const scoreVal = 72.0;
+const scoreColor = '#eab308';
+new Chart(document.getElementById('scoreRing'), {
+  type: 'doughnut',
+  data: {
+    datasets: [{
+      data: [scoreVal, 100 - scoreVal],
+      backgroundColor: [scoreColor, 'rgba(255,255,255,0.05)'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    cutout: '78%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    animation: { animateRotate: true, duration: 1200 }
+  }
+});
+
+// ── Typing speed chart ────────────────────────────────────────────────────────
+const speedData = [240.0, 240.0, 240.0, 280.0, 280.0, 240.0, 240.0, 280.0, 320.0, 360.0, 320.0, 360.0, 360.0, 360.0, 400.0, 240.0, 280.0, 320.0, 160.0, 200.0, 240.0, 200.0, 200.0, 240.0, 240.0, 160.0, 200.0, 200.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 280.0, 320.0, 280.0, 320.0, 360.0, 400.0, 440.0, 400.0, 400.0, 400.0, 400.0, 440.0, 440.0, 440.0, 440.0, 440.0, 440.0, 440.0, 480.0, 280.0, 320.0, 320.0, 360.0, 320.0, 360.0, 320.0, 320.0, 360.0, 400.0, 440.0, 480.0, 480.0, 480.0, 400.0, 400.0, 320.0, 320.0, 320.0, 360.0, 280.0, 320.0, 320.0, 360.0, 360.0, 360.0, 400.0, 400.0, 360.0, 360.0, 400.0, 400.0, 360.0, 400.0, 320.0, 320.0, 360.0, 400.0, 400.0, 400.0, 400.0, 360.0, 360.0, 360.0, 360.0, 320.0, 240.0, 280.0, 280.0, 280.0, 320.0, 320.0, 360.0, 360.0, 320.0, 360.0, 400.0, 360.0, 400.0, 400.0, 360.0, 320.0, 360.0, 400.0, 440.0, 360.0, 360.0, 360.0, 400.0, 360.0, 400.0, 280.0, 320.0, 360.0, 320.0, 320.0, 320.0, 320.0, 320.0, 320.0, 280.0, 320.0, 360.0, 400.0, 360.0, 400.0, 400.0, 400.0, 400.0, 400.0, 440.0, 400.0, 360.0, 280.0, 280.0, 320.0, 360.0, 360.0, 320.0, 280.0, 320.0, 360.0, 400.0, 280.0, 320.0, 240.0, 200.0, 200.0, 240.0, 280.0, 280.0, 280.0, 320.0, 360.0, 400.0, 400.0, 360.0, 280.0, 240.0, 200.0, 240.0, 240.0, 240.0, 280.0, 320.0, 280.0, 80.0, 80.0, 120.0, 160.0, 160.0, 200.0, 240.0, 240.0, 240.0, 240.0, 200.0, 80.0, 120.0, 120.0, 160.0, 200.0, 240.0, 40.0, 80.0, 120.0];
+new Chart(document.getElementById('speedChart'), {
+  type: 'line',
+  data: {
+    labels: speedData.map((_, i) => i + 1),
+    datasets: [{
+      label: 'Chars/min',
+      data: speedData,
+      borderColor: '#06b6d4',
+      backgroundColor: 'rgba(6,182,212,0.08)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 0,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { display: false },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+    }
+  }
+});
+
+// ── Activity distribution ─────────────────────────────────────────────────────
+new Chart(document.getElementById('activityChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Typed Chars', 'Pasted Chars', 'Backspaces'],
+    datasets: [{
+      data: [526, 1311, 76],
+      backgroundColor: ['rgba(6,182,212,0.6)', 'rgba(234,179,8,0.6)', 'rgba(139,92,246,0.4)'],
+      borderColor:     ['#06b6d4', '#eab308', '#8b5cf6'],
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>

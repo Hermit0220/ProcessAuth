@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProcessAuth Report – 49d72aa4 · by Hermit</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030712;
+    --surface: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --cyan: #06b6d4;
+    --purple: #8b5cf6;
+    --red: #ef4444;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* ── Page header ─────────────────────────────────────────────────────────── */
+  .page-header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .brand-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(6,182,212,0.08);
+    border: 1px solid rgba(6,182,212,0.20);
+    border-radius: 999px;
+    padding: 0.3rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  .brand-tag .dot { width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block; }
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { color: var(--muted); margin-top:0.5rem; font-size:0.88rem; }
+  .hermit-credit {
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    color: #1e3a4a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .hermit-credit span { color: var(--cyan); font-weight: 700; }
+
+  /* ── Cards ───────────────────────────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+  .card h2 {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--cyan); }
+  .stat-label { font-size: 0.78rem; color: var(--muted); margin-top:0.25rem; }
+  .section-title { font-size:1rem; font-weight:700; margin-bottom:1rem; color:var(--text); }
+
+  /* ── Clickable stat cards ───────────────────────────────────────────────── */
+  .card.clickable {
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .card.clickable:hover {
+    border-color: rgba(6,182,212,0.35);
+    background: rgba(6,182,212,0.06);
+    transform: translateY(-2px);
+  }
+  .card.clickable::after {
+    content: "ⓘ Click for details";
+    position: absolute;
+    bottom: 0.6rem; right: 0.9rem;
+    font-size: 0.62rem;
+    color: #1e3a4a;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Score ring ──────────────────────────────────────────────────────────── */
+  .score-section { display:flex; flex-direction:column; align-items:center; gap:0.5rem; }
+  .score-ring-wrap { position:relative; width:150px; height:150px; }
+  .score-ring-wrap canvas { position:absolute; top:0; left:0; }
+  .score-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+  .score-number { font-size:2.4rem; font-weight:800; }
+  .score-pct { font-size:0.78rem; color:var(--muted); }
+
+  /* ── Badges ──────────────────────────────────────────────────────────────── */
+  .badge { display:inline-block; padding:0.15rem 0.55rem; border-radius:999px; font-size:0.68rem; font-weight:700; }
+  .badge-red    { background:rgba(239,68,68,0.15);  color:var(--red);    border:1px solid rgba(239,68,68,0.3);   }
+  .badge-yellow { background:rgba(234,179,8,0.15);  color:var(--yellow); border:1px solid rgba(234,179,8,0.3);   }
+  .badge-green  { background:rgba(34,197,94,0.15);  color:var(--green);  border:1px solid rgba(34,197,94,0.3);   }
+  .badge-pink   { background:rgba(244,114,182,0.15);color:var(--pink);   border:1px solid rgba(244,114,182,0.3); }
+  .badge-cyan   { background:rgba(6,182,212,0.12);  color:var(--cyan);   border:1px solid rgba(6,182,212,0.25);  }
+
+  /* ── Tables ──────────────────────────────────────────────────────────────── */
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  th { text-align:left; padding:0.6rem 1rem; border-bottom:1px solid var(--border); color:var(--muted); font-weight:600; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; }
+  td { padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  /* Clickable reason chips */
+  .reason-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin: 2px 3px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .reason-chip:hover {
+    background: rgba(239,68,68,0.12);
+    border-color: rgba(239,68,68,0.35);
+    color: var(--red);
+  }
+  .reason-chip .chip-icon { font-size: 0.8rem; }
+
+  /* ── Timeline ────────────────────────────────────────────────────────────── */
+  .timeline-list { list-style:none; }
+  .timeline-list li { display:flex; gap:1rem; padding:0.75rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; align-items:center; }
+  .timeline-list li:last-child { border-bottom:none; }
+  .tl-time   { color:var(--cyan); font-family:monospace; min-width:80px; }
+  .tl-type   { color:var(--purple); min-width:130px; font-weight:500; }
+  .tl-detail { color:var(--muted); flex:1; }
+
+  /* ── Chart ───────────────────────────────────────────────────────────────── */
+  .chart-container { position:relative; height:220px; }
+
+  /* ── Hash box ────────────────────────────────────────────────────────────── */
+  .hash-box {
+    background:rgba(6,182,212,0.06); border:1px solid rgba(6,182,212,0.2);
+    border-radius:0.5rem; padding:1rem;
+    font-family:monospace; font-size:0.75rem; color:var(--cyan);
+    word-break:break-all; margin-top:1rem;
+  }
+
+  /* ── MODAL ───────────────────────────────────────────────────────────────── */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(3,7,18,0.82);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #0d1829;
+    border: 1px solid rgba(6,182,212,0.25);
+    border-radius: 1.25rem;
+    max-width: 580px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:translateY(16px) scale(0.97); } to { opacity:1; transform:none; } }
+  .modal-close {
+    position: absolute;
+    top: 1.1rem; right: 1.25rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 1rem;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: rgba(239,68,68,0.18); color: var(--red); }
+  .modal-title {
+    font-size: 1.1rem; font-weight: 800; color: var(--cyan);
+    margin-bottom: 0.4rem; padding-right: 2rem;
+  }
+  .modal-subtitle { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .modal-section { margin-bottom: 1.25rem; }
+  .modal-section h4 {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #334155; margin-bottom: 0.5rem;
+  }
+  .modal-section p { font-size: 0.88rem; color: #94a3b8; line-height: 1.7; }
+  .modal-section ul { font-size: 0.86rem; color: #94a3b8; line-height: 1.8; padding-left: 1.2rem; }
+  .modal-section code {
+    background: rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.15);
+    border-radius: 4px; padding: 0.15rem 0.4rem;
+    font-family:monospace; font-size:0.8rem; color:var(--cyan);
+  }
+  .modal-impact {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.18);
+    border-radius: 0.6rem; padding: 0.85rem 1rem; margin-top: 1rem;
+  }
+  .modal-impact .impact-icon { font-size: 1.4rem; }
+  .modal-impact .impact-text { font-size: 0.83rem; color:#94a3b8; line-height:1.5; }
+  .modal-impact .impact-text strong { color: var(--red); }
+
+  /* ── Responsive ──────────────────────────────────────────────────────────── */
+  @media (max-width:768px) { .grid-2, .grid-4 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE HEADER ═══════════════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="brand-tag"><span class="dot"></span> Behavioral Authenticity Analyzer · by Hermit <span class="dot"></span></div>
+  <h1>Authenticity Analysis Report</h1>
+  <p class="subtitle">Session ID: 49d72aa4-df98-4f53-ba4b-70c150b2d2a6 &nbsp;·&nbsp; Generated 2026-04-03 18:11:54</p>
+  <p class="hermit-credit">ProcessAuth — Developed by <span>Hermit</span> · Behavioral Writing Intelligence</p>
+</div>
+
+<!-- ══ KPI CARDS (clickable) ═════════════════════════════════════════════════ -->
+<div class="grid-4">
+  <div class="card">
+    <h2>Total Words</h2>
+    <div class="stat-value">225</div>
+    <div class="stat-label">across entire document</div>
+  </div>
+  <div class="card">
+    <h2>Typed Words</h2>
+    <div class="stat-value" style="color:var(--green)">162</div>
+    <div class="stat-label">via keyboard</div>
+  </div>
+  <div class="card clickable" onclick="openModal('modal-pasted')">
+    <h2>Pasted Words</h2>
+    <div class="stat-value" style="color:var(--yellow)">63</div>
+    <div class="stat-label">detected insertions</div>
+  </div>
+  <div class="card clickable" onclick="openModal('modal-suspicious')">
+    <h2>Suspicious Events</h2>
+    <div class="stat-value" style="color:var(--red)">1</div>
+    <div class="stat-label">flagged by engine</div>
+  </div>
+</div>
+
+<!-- ══ SCORE + CHART ══════════════════════════════════════════════════════════ -->
+<div class="grid-2">
+  <div class="card">
+    <p class="section-title">Authenticity Score</p>
+    <div class="score-section">
+      <div class="score-ring-wrap">
+        <canvas id="scoreRing" width="150" height="150"></canvas>
+        <div class="score-center">
+          <div class="score-number" style="color:#22c55e">90</div>
+          <div class="score-pct">/ 100</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:0.5rem">
+        <span class="badge badge-green">High Authenticity</span>
+      </div>
+      <table style="margin-top:1rem;font-size:0.8rem">
+        <tr><td style="color:var(--muted)">Total keystrokes</td><td style="text-align:right">814</td></tr>
+        <tr><td style="color:var(--muted)">Backspaces</td><td style="text-align:right">118</td></tr>
+        <tr><td style="color:var(--muted)">Clipboard events</td><td style="text-align:right">1</td></tr>
+        <tr><td style="color:var(--muted)">External web hits</td><td style="text-align:right;color:var(--pink)">0</td></tr>
+        <tr><td style="color:var(--muted)">Total penalty</td><td style="text-align:right;color:var(--red)">−10.0</td></tr>
+        <tr><td style="color:var(--muted)">Avg typing speed</td><td style="text-align:right">256.9 cpm</td></tr>
+        <tr><td style="color:var(--muted)">Session duration</td><td style="text-align:right">13m 51s</td></tr>
+        <tr><td style="color:var(--muted)">Document</td><td style="text-align:right;font-size:0.7rem;color:var(--muted)">TEST DOCUMENT.docx</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <p class="section-title">Typing Speed Timeline</p>
+    <div class="chart-container"><canvas id="speedChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ══ WRITING ACTIVITY CHART ════════════════════════════════════════════════ -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Writing Activity Distribution</p>
+  <div class="chart-container"><canvas id="activityChart"></canvas></div>
+</div>
+
+<!-- ══ SUSPICIOUS EVENTS TABLE ═══════════════════════════════════════════════ -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Suspicious Insertion Events</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Chars Inserted</th>
+        <th>Penalty</th>
+        <th>Clipboard Correlated</th>
+        <th>Reasons <span style="font-size:0.6rem;color:#1e3a4a;font-weight:400;letter-spacing:0">(click chip for explanation)</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td style="font-family:monospace;color:var(--cyan)">17:59:13</td>
+        <td>315</td>
+        <td style="color:var(--red);font-weight:700">−10.0</td>
+        <td><span class="badge badge-red">Yes</span></td>
+        <td>
+          
+          <span class="reason-chip" onclick="explainReason('large clipboard content (315 chars)')">
+            <span class="chip-icon">⚠</span>large clipboard content (315 chars)
+          </span>
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+</div>
+
+<!-- ══ EVENT TIMELINE ════════════════════════════════════════════════════════ -->
+<div class="card" style="margin-bottom:1.5rem">
+  <p class="section-title">Event Log <span style="font-size:0.75rem;color:var(--muted);font-weight:400">(last 50 non-keystroke events)</span></p>
+  <ul class="timeline-list">
+    
+  </ul>
+</div>
+
+<!-- ══ INTEGRITY HASH ════════════════════════════════════════════════════════ -->
+<div class="card" style="margin-bottom:2rem">
+  <p class="section-title">Session Integrity Hash</p>
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem">
+    SHA-256 fingerprint of all event records. Any tampering with the log changes this value.
+  </p>
+  <div class="hash-box">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+</div>
+
+<div style="text-align:center;padding:2rem 0 1rem;color:#0f2027;font-size:0.72rem;letter-spacing:0.08em">
+  ProcessAuth &copy; 2026 &nbsp;·&nbsp; Behavioral Writing Authenticity Analyzer by <span style="color:#164e63">Hermit</span> &nbsp;·&nbsp; For authorized use only
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     MODAL — Pasted Words
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-pasted" onclick="closeOnBackdrop(event, 'modal-pasted')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-pasted')">✕</button>
+    <div class="modal-title">📋 Pasted Words — What This Means</div>
+    <div class="modal-subtitle">Detected content insertions larger than expected typing bursts</div>
+
+    <div class="modal-section">
+      <h4>How it's detected</h4>
+      <p>ProcessAuth monitors your system clipboard every second. When clipboard content exceeds <code>150 characters</code>, it is classified as a significant paste event. The number of <strong>Pasted Words</strong> is estimated by dividing total pasted characters by 5 (average word length).</p>
+    </div>
+
+    <div class="modal-section">
+      <h4>What triggers this count</h4>
+      <ul>
+        <li>Copying text from a website, PDF, or another document and pasting into the monitored file</li>
+        <li>Pasting content from a previously copied source while the session is active</li>
+        <li>Large block insertions that arrive without corresponding keystroke activity</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h4>Score impact</h4>
+      <ul>
+        <li><code>150–300 chars</code> paste → <strong style="color:var(--red)">−5 pts</strong></li>
+        <li><code>300–600 chars</code> paste → <strong style="color:var(--red)">−10 pts</strong></li>
+        <li><code>&gt; 600 chars</code> paste → <strong style="color:var(--red)">−18 pts</strong></li>
+        <li>Rapid back-to-back pastes → additional <strong style="color:var(--red)">−5 pts</strong></li>
+      </ul>
+    </div>
+
+    <div class="modal-impact">
+      <div class="impact-icon">⚡</div>
+      <div class="impact-text">
+        A high pasted-word count is a <strong>strong signal of externally sourced content</strong>. Authentic writers rarely paste large blocks — they type their own ideas progressively.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     MODAL — Suspicious Events
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-suspicious" onclick="closeOnBackdrop(event, 'modal-suspicious')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-suspicious')">✕</button>
+    <div class="modal-title">🚨 Suspicious Events — What This Means</div>
+    <div class="modal-subtitle">Events flagged by the Hermit Behavioral Engine as anomalous</div>
+
+    <div class="modal-section">
+      <h4>What counts as a suspicious event?</h4>
+      <p>Each time the behavioral engine detects an anomaly — a large paste, a clipboard correlation, a sudden block insertion, or a confirmed external web source match — it logs one <strong>Suspicious Event</strong> and applies a proportional score penalty.</p>
+    </div>
+
+    <div class="modal-section">
+      <h4>Categories of suspicious events</h4>
+      <ul>
+        <li><strong style="color:var(--yellow)">Large clipboard paste</strong> — content longer than 150 chars copied from outside the document</li>
+        <li><strong style="color:var(--red)">Rapid paste burst</strong> — two or more large pastes within 3 seconds of each other</li>
+        <li><strong style="color:var(--red)">Uncorrelated block insertion</strong> — large text appears in the document file without any clipboard event</li>
+        <li><strong style="color:var(--pink)">External web match</strong> — pasted text was found verbatim (or near-verbatim) on DuckDuckGo or Wikipedia</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h4>Score deduction table</h4>
+      <table>
+        <tr><th>Event</th><th>Penalty</th></tr>
+        <tr><td>Clipboard paste 150–300 chars</td><td style="color:var(--red)">−5</td></tr>
+        <tr><td>Clipboard paste 300–600 chars</td><td style="color:var(--red)">−10</td></tr>
+        <tr><td>Clipboard paste &gt; 600 chars</td><td style="color:var(--red)">−18</td></tr>
+        <tr><td>Rapid paste burst</td><td style="color:var(--red)">−5</td></tr>
+        <tr><td>Large doc insert (no clipboard)</td><td style="color:var(--red)">−10</td></tr>
+        <tr><td>External source confirmed</td><td style="color:var(--pink)">−10</td></tr>
+      </table>
+    </div>
+
+    <div class="modal-impact">
+      <div class="impact-icon">🔍</div>
+      <div class="impact-text">
+        The more suspicious events, the lower the Authenticity Score. <strong>Zero suspicious events = 100% score</strong>. Each event represents a measurable deviation from organic writing behaviour.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     MODAL — Dynamic Reason Explainer
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-reason" onclick="closeOnBackdrop(event, 'modal-reason')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-reason')">✕</button>
+    <div class="modal-title" id="reason-title">Reason Details</div>
+    <div class="modal-subtitle" id="reason-subtitle"></div>
+    <div id="reason-body"></div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     CHARTS + MODAL JS
+     ════════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── Score ring ────────────────────────────────────────────────────────────────
+const scoreVal   = 90.0;
+const scoreColor = '#22c55e';
+new Chart(document.getElementById('scoreRing'), {
+  type: 'doughnut',
+  data: {
+    datasets: [{
+      data: [scoreVal, 100 - scoreVal],
+      backgroundColor: [scoreColor, 'rgba(255,255,255,0.05)'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    cutout: '78%',
+    plugins: { legend: { display:false }, tooltip: { enabled:false } },
+    animation: { animateRotate:true, duration:1200 }
+  }
+});
+
+// ── Speed chart ───────────────────────────────────────────────────────────────
+const speedData = [400.0, 400.0, 400.0, 400.0, 240.0, 240.0, 280.0, 240.0, 200.0, 240.0, 280.0, 320.0, 360.0, 400.0, 440.0, 480.0, 400.0, 320.0, 280.0, 320.0, 360.0, 360.0, 400.0, 360.0, 320.0, 360.0, 400.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 360.0, 400.0, 400.0, 360.0, 360.0, 400.0, 400.0, 320.0, 280.0, 320.0, 160.0, 80.0, 120.0, 120.0, 160.0, 200.0, 240.0, 280.0, 200.0, 240.0, 280.0, 160.0, 160.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 280.0, 240.0, 200.0, 240.0, 240.0, 240.0, 280.0, 320.0, 200.0, 160.0, 200.0, 160.0, 200.0, 240.0, 280.0, 320.0, 280.0, 280.0, 320.0, 360.0, 360.0, 320.0, 320.0, 320.0, 120.0, 120.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 320.0, 320.0, 360.0, 400.0, 240.0, 280.0, 320.0, 320.0, 360.0, 320.0, 320.0, 320.0, 360.0, 320.0, 280.0, 280.0, 320.0, 320.0, 280.0, 320.0, 240.0, 200.0, 240.0, 240.0, 280.0, 240.0, 40.0, 80.0, 120.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 280.0, 40.0, 80.0, 40.0, 80.0, 80.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 360.0, 40.0, 80.0, 120.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 40.0, 80.0, 120.0, 160.0, 40.0, 80.0, 80.0, 80.0, 120.0, 160.0, 160.0, 40.0, 80.0, 40.0, 80.0, 80.0, 40.0, 40.0, 80.0, 120.0, 40.0, 80.0, 120.0, 40.0, 80.0, 40.0, 40.0, 80.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 280.0, 160.0, 120.0, 160.0, 200.0];
+new Chart(document.getElementById('speedChart'), {
+  type: 'line',
+  data: {
+    labels: speedData.map((_,i) => i+1),
+    datasets: [{
+      label:'Chars/min', data: speedData,
+      borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.08)',
+      fill:true, tension:0.4, pointRadius:0,
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false } },
+    scales:{
+      x:{ display:false },
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#64748b', font:{size:10} } }
+    }
+  }
+});
+
+// ── Activity chart ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('activityChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Typed Chars','Pasted Chars','Backspaces'],
+    datasets: [{
+      data: [814, 315, 118],
+      backgroundColor: ['rgba(6,182,212,0.6)','rgba(234,179,8,0.6)','rgba(139,92,246,0.4)'],
+      borderColor:     ['#06b6d4','#eab308','#8b5cf6'],
+      borderWidth:1, borderRadius:6,
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false } },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ color:'#94a3b8' } },
+      y:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#64748b', font:{size:10} } }
+    }
+  }
+});
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeOnBackdrop(e, id){ if(e.target === document.getElementById(id)) closeModal(id); }
+
+// ── Dynamic reason explainer ──────────────────────────────────────────────────
+const REASON_DB = {
+  "very large clipboard content": {
+    icon: "📋",
+    title: "Very Large Clipboard Paste",
+    subtitle: "Content exceeding 600 characters was pasted in a single action",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>The clipboard contained more than <code>600 characters</code> when it was detected. This is equivalent to roughly 120+ words pasted in a single action — far beyond what any person would type in a single keystroke burst.</p>
+      </div>
+      <div class="modal-section">
+        <h4>Why this is suspicious</h4>
+        <p>Authentic writers do not typically copy and paste entire paragraphs or sections from external sources. A paste of this size strongly suggests the content was authored elsewhere — in another app, browser, or AI tool — and inserted wholesale.</p>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">⚡</div>
+        <div class="impact-text">Penalty: <strong>−18 points</strong>. This is the highest single-event penalty in the engine.</div>
+      </div>`
+  },
+  "large clipboard content": {
+    icon: "📋",
+    title: "Large Clipboard Paste",
+    subtitle: "Content between 300–600 characters was pasted in a single action",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>The clipboard contained between <code>300–600 characters</code> — approximately 60–120 words — when pasted. This is a moderate-to-large insertion that suggests externally sourced content.</p>
+      </div>
+      <div class="modal-section">
+        <h4>What could cause this</h4>
+        <ul>
+          <li>Copying a paragraph from a website or research paper</li>
+          <li>Pasting from a document editor, email, or AI chatbot</li>
+          <li>Moving large text blocks from another section of the same document</li>
+        </ul>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">⚡</div>
+        <div class="impact-text">Penalty: <strong>−10 points</strong>.</div>
+      </div>`
+  },
+  "medium clipboard content": {
+    icon: "📎",
+    title: "Medium Clipboard Paste",
+    subtitle: "Content between 150–300 characters was pasted",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>A clipboard paste of <code>150–300 characters</code> (roughly 30–60 words) was detected. While smaller pastes can happen in legitimate writing (e.g., copying a quote), this size is still noteworthy.</p>
+      </div>
+      <div class="modal-section">
+        <h4>Context matters</h4>
+        <p>A single event at this size alongside typical typing is less concerning. Multiple events of this size, especially correlated with low typing activity, elevate the suspicion level.</p>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">⚡</div>
+        <div class="impact-text">Penalty: <strong>−5 points</strong>.</div>
+      </div>`
+  },
+  "rapid paste burst": {
+    icon: "⚡",
+    title: "Rapid Paste Burst",
+    subtitle: "Two or more large pastes occurred within 3 seconds of each other",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>Multiple significant clipboard paste events were detected within <code>3 seconds</code> of each other. This pattern — pasting, then pasting again almost immediately — is characteristic of someone rapidly inserting pre-written content.</p>
+      </div>
+      <div class="modal-section">
+        <h4>Why this matters</h4>
+        <p>When someone copies and pastes multiple chunks in very rapid succession, it strongly suggests the content was prepared externally and is being transferred in batches rather than written organically.</p>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">⚡</div>
+        <div class="impact-text">Additional penalty: <strong>−5 points</strong> on top of the base paste penalty.</div>
+      </div>`
+  },
+  "clipboard correlation": {
+    icon: "🔗",
+    title: "Clipboard-Correlated Document Insertion",
+    subtitle: "A large document change occurred within 2 seconds of a clipboard event",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>The document file changed significantly within <code>2 seconds</code> of a clipboard event. This time correlation makes it very likely the clipboard content was pasted directly into the document.</p>
+      </div>
+      <div class="modal-section">
+        <h4>The correlation signal</h4>
+        <p>ProcessAuth watches both the clipboard and the document file independently. When both fire in rapid succession, it confirms that external content entered the document through a paste operation rather than manual typing.</p>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">🔗</div>
+        <div class="impact-text">This is a <strong>confirmation signal</strong> — it validates that the clipboard event directly resulted in document content.</div>
+      </div>`
+  },
+  "large block insertion": {
+    icon: "📄",
+    title: "Large Block Insertion (No Clipboard Signal)",
+    subtitle: "A large block of text appeared in the document without a corresponding clipboard event",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>The document file gained a large amount of new content (200+ characters), but there was no corresponding clipboard change detected. This means the content was not pasted via the normal clipboard — it may have been inserted through drag-and-drop, auto-complete, or another method.</p>
+      </div>
+      <div class="modal-section">
+        <h4>Possible causes</h4>
+        <ul>
+          <li>Drag-and-drop text from another application</li>
+          <li>AI writing assistant or autocomplete tool</li>
+          <li>Auto-inserted content from a template or macro</li>
+          <li>File loaded with pre-existing content from a different source</li>
+        </ul>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">⚡</div>
+        <div class="impact-text">Penalty: <strong>−10 points</strong>. This is treated as unexplained content insertion.</div>
+      </div>`
+  },
+  "external source match": {
+    icon: "🌐",
+    title: "External Source Match Detected",
+    subtitle: "Pasted text was found on a public web source (DuckDuckGo / Wikipedia)",
+    body: `
+      <div class="modal-section">
+        <h4>What happened</h4>
+        <p>ProcessAuth's external checker sent a probe (first 80 characters of the pasted content) to the <strong>DuckDuckGo Instant Answer API</strong> and the <strong>Wikipedia Search API</strong>. One or both returned a match — meaning very similar text exists on a public web page.</p>
+      </div>
+      <div class="modal-section">
+        <h4>What this means</h4>
+        <p>The pasted content closely matches text found publicly on the internet. This is a strong indicator that the content was not originally authored by the writer but was copied from an external online source.</p>
+      </div>
+      <div class="modal-section">
+        <h4>APIs used (free, no key required)</h4>
+        <ul>
+          <li><strong>DuckDuckGo Instant Answer</strong> — checks for direct topic matches</li>
+          <li><strong>Wikipedia Search</strong> — checks for article-level text overlap (&gt;45% word match)</li>
+        </ul>
+      </div>
+      <div class="modal-impact">
+        <div class="impact-icon">🌐</div>
+        <div class="impact-text">Penalty: <strong>−10 points</strong>. This is the only penalty that requires a live internet check.</div>
+      </div>`
+  },
+};
+
+function explainReason(rawReason) {
+  const r = rawReason.toLowerCase();
+  let match = null;
+
+  // Try to find the best matching key
+  for (const [key, data] of Object.entries(REASON_DB)) {
+    if (r.includes(key)) { match = data; break; }
+  }
+
+  if (!match) {
+    // Generic fallback
+    match = {
+      icon: "ℹ️",
+      title: "Flagged Behaviour",
+      subtitle: rawReason,
+      body: `<div class="modal-section"><h4>Description</h4><p>The behavioral engine flagged this event as suspicious based on deviation from expected typing patterns. Review the surrounding events in the timeline for context.</p></div>
+      <div class="modal-impact"><div class="impact-icon">⚡</div><div class="impact-text">A <strong>score penalty</strong> was applied for this event.</div></div>`
+    };
+  }
+
+  document.getElementById('reason-title').textContent = match.icon + '  ' + match.title;
+  document.getElementById('reason-subtitle').textContent = match.subtitle;
+  document.getElementById('reason-body').innerHTML = match.body;
+  openModal('modal-reason');
+}
+</script>
+</body>
+</html>

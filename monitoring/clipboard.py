@@ -67,6 +67,11 @@ class ClipboardMonitor:
                 self._last_hash = current_hash
                 self._event_count += 1
                 approx_len = len(content)
+
+                # _snippet is in-memory ONLY — never written to DB/JSON.
+                # Used by behavioral engine and external checker.
+                snippet = content[:350].strip() if approx_len > 50 else ""
+
                 record = {
                     "session_id"  : self._session_id,
                     "timestamp"   : time.time(),
@@ -78,6 +83,7 @@ class ClipboardMonitor:
                     "payload_hash": current_hash,
                     "raw_json"    : None,
                     "_approx_len" : approx_len,
+                    "_snippet"    : snippet,   # in-memory only
                 }
                 logger.debug("Clipboard changed, len≈%d", approx_len)
                 self._on_event(record)

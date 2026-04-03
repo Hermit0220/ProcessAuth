@@ -6,12 +6,17 @@ Authenticity Score formula:
     score = 100 - sum(penalties)
     clamped to [0, 100]
 
-Penalty tiers:
-  Tier 1 — burst < 60 chars     : 0
-  Tier 2 — burst 60–200 chars   : -5
-  Tier 3 — burst > 200 chars    : -15
-  Clipboard correlation within 2 s of a large insert: additional -10
-  Large paragraph block (> 150 chars, no keystroke lead-up): -10
+Penalty tiers (clipboard-direct, fires immediately on paste — no file-save needed):
+  Clipboard 150–300 chars      : -5
+  Clipboard 300–600 chars      : -10
+  Clipboard > 600 chars        : -18
+  Clipboard burst reuse (< 3s) : additional -5
+  External source confirmed    : additional -10
+
+Doc-diff penalties (fires when Word doc is saved):
+  Tier 2 burst 60–200 chars inserted : -5
+  Tier 3 burst > 200 chars inserted  : -15
+  Clipboard correlation within 2s    : additional -10
 """
 import threading
 import time
@@ -22,7 +27,18 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-CLIPBOARD_WINDOW   = 2.0   # seconds
+# ── Clipboard direct-penalty thresholds ──────────────────────────────────────
+CLIP_SMALL        = 150    # chars — below this: no direct penalty
+CLIP_MED          = 300    # chars
+CLIP_LARGE        = 600    # chars
+PENALTY_CLIP_MED  = 5
+PENALTY_CLIP_LRG  = 10
+PENALTY_CLIP_XLG  = 18
+PENALTY_CLIP_BURST = 5     # if two large pastes within 3 s
+CLIP_BURST_WINDOW  = 3.0   # seconds
+
+# ── Doc-diff thresholds ──────────────────────────────────────────────────────
+CLIPBOARD_WINDOW   = 2.0
 TIER2_THRESHOLD    = 60
 TIER3_THRESHOLD    = 200
 PENALTY_TIER2      = 5
@@ -30,18 +46,22 @@ PENALTY_TIER3      = 15
 PENALTY_CORRELATED = 10
 PENALTY_BLOCK_INS  = 10
 
+# ── External source penalty ──────────────────────────────────────────────────
+PENALTY_EXTERNAL   = 10
+
 
 @dataclass
 class SessionStats:
-    total_keystrokes   : int   = 0
-    total_chars_typed  : int   = 0
-    total_chars_pasted : int   = 0
-    backspaces         : int   = 0
-    paste_events       : int   = 0
-    suspicious_events  : int   = 0
-    penalties          : float = 0.0
-    authenticity_score : float = 100.0
-    typing_speeds      : list[float] = field(default_factory=list)
+    total_keystrokes      : int   = 0
+    total_chars_typed     : int   = 0
+    total_chars_pasted    : int   = 0
+    backspaces            : int   = 0
+    paste_events          : int   = 0
+    suspicious_events     : int   = 0
+    external_hits         : int   = 0
+    penalties             : float = 0.0
+    authenticity_score    : float = 100.0
+    typing_speeds         : list[float] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -51,6 +71,7 @@ class SessionStats:
             "backspaces"        : self.backspaces,
             "paste_events"      : self.paste_events,
             "suspicious_events" : self.suspicious_events,
+            "external_hits"     : self.external_hits,
             "penalties"         : round(self.penalties, 2),
             "authenticity_score": round(self.authenticity_score, 2),
             "avg_typing_speed"  : round(
@@ -64,18 +85,20 @@ class BehavioralEngine:
     """
     Consumes event records from all monitors and maintains running session stats.
     Thread-safe — all monitors push via `process_event()`.
+
+    Score drops IMMEDIATELY on large clipboard events — no file-save required.
     """
 
     def __init__(self, on_stats_update: Callable[[SessionStats], None] | None = None) -> None:
-        self._stats   = SessionStats()
-        self._lock    = threading.Lock()
+        self._stats     = SessionStats()
+        self._lock      = threading.Lock()
         self._on_update = on_stats_update
 
-        # Track clipboard timestamps for correlation
+        # Clipboard timestamps for doc-diff correlation
         self._clipboard_times: list[float] = []
-        # Track doc diff events
-        self._diff_events: list[dict] = []
-        # Track suspicious insertion timestamps for report
+        # Track times of large clipboard events for burst detection
+        self._large_clip_times: list[float] = []
+        # Suspicious insertions for final report
         self.suspicious_insertions: list[dict] = []
 
     # ── public API ─────────────────────────────────────────────────────────────
@@ -91,6 +114,8 @@ class BehavioralEngine:
                 self._handle_clipboard(record, ts)
             elif etype == "doc_diff":
                 self._handle_diff(record, ts)
+            elif etype == "external_hit":
+                self._handle_external_hit(record, ts)
 
             self._recalc_score()
 
@@ -106,45 +131,91 @@ class BehavioralEngine:
     def _handle_key(self, record: dict) -> None:
         self._stats.total_keystrokes  += 1
         self._stats.total_chars_typed += 1
-        self._stats.backspaces        += record.get("_backspaces", 0)
+        # Only accumulate backspaces when we see a fresh count increase
+        self._stats.backspaces = max(
+            self._stats.backspaces,
+            record.get("_backspaces", self._stats.backspaces)
+        )
         spd = record.get("typing_speed", 0.0)
         if spd > 0:
             self._stats.typing_speeds.append(spd)
 
     def _handle_clipboard(self, record: dict, ts: float) -> None:
+        """
+        Apply DIRECT score penalties based on clipboard content size.
+        This fires immediately on paste — does NOT wait for the .docx to be saved.
+        """
         self._clipboard_times.append(ts)
         approx_len = record.get("_approx_len", record.get("chars_added", 0))
-        if approx_len > TIER2_THRESHOLD:
-            self._stats.paste_events += 1
+
+        if approx_len < CLIP_SMALL:
+            # Small copy — no penalty (could be copying a word within the doc)
+            return
+
+        self._stats.paste_events += 1
+        self._stats.total_chars_pasted += approx_len
+
+        # Determine base penalty by size
+        penalty = 0.0
+        reason  = []
+
+        if approx_len > CLIP_LARGE:
+            penalty += PENALTY_CLIP_XLG
+            reason.append(f"very large clipboard content ({approx_len} chars)")
+        elif approx_len > CLIP_MED:
+            penalty += PENALTY_CLIP_LRG
+            reason.append(f"large clipboard content ({approx_len} chars)")
+        else:
+            penalty += PENALTY_CLIP_MED
+            reason.append(f"medium clipboard content ({approx_len} chars)")
+
+        # Burst check: another large paste within the burst window
+        recent_large = [t for t in self._large_clip_times if ts - t <= CLIP_BURST_WINDOW]
+        if recent_large:
+            penalty += PENALTY_CLIP_BURST
+            reason.append("rapid paste burst")
+
+        self._large_clip_times.append(ts)
+        self._stats.suspicious_events += 1
+        self._stats.penalties         += penalty
+
+        self.suspicious_insertions.append({
+            "timestamp"  : ts,
+            "new_chars"  : approx_len,
+            "penalty"    : penalty,
+            "reasons"    : reason,
+            "correlated" : True,  # clipboard IS the evidence here
+        })
+        logger.info("Clipboard penalty: %s  (−%.0f pts)", reason, penalty)
 
     def _handle_diff(self, record: dict, ts: float) -> None:
-        new_chars      = record.get("new_chars", 0)
-        large_insert   = record.get("large_insertion", False)
-        suspicious     = record.get("suspicious", False)
-
-        self._stats.total_chars_pasted += new_chars if large_insert else 0
+        """
+        Secondary penalty from doc-diff (fires when Word saves the file).
+        Avoids double-counting chars already penalised by clipboard event.
+        """
+        new_chars    = record.get("new_chars", 0)
+        large_insert = record.get("large_insertion", False)
 
         penalty = 0.0
         reason  = []
 
         if new_chars > TIER3_THRESHOLD:
             penalty += PENALTY_TIER3
-            reason.append(f"Tier-3 burst ({new_chars} chars)")
+            reason.append(f"Tier-3 doc insert ({new_chars} chars)")
         elif new_chars > TIER2_THRESHOLD:
             penalty += PENALTY_TIER2
-            reason.append(f"Tier-2 burst ({new_chars} chars)")
+            reason.append(f"Tier-2 doc insert ({new_chars} chars)")
 
-        # Clipboard correlation check
+        # Extra penalty only if clipboard was NOT the trigger (unexpected block)
         correlated = any(
             abs(ts - ct) <= CLIPBOARD_WINDOW for ct in self._clipboard_times
         )
         if correlated and large_insert:
-            penalty += PENALTY_CORRELATED
-            reason.append("clipboard correlation")
-
-        if large_insert and not correlated:
+            # Clipboard already penalised — just log, no extra hit
+            reason.append("clipboard-correlated diff (already penalised)")
+        elif large_insert and not correlated:
             penalty += PENALTY_BLOCK_INS
-            reason.append("large block insertion, no clipboard signal")
+            reason.append("large doc insert without clipboard signal")
 
         if penalty > 0:
             self._stats.suspicious_events += 1
@@ -156,7 +227,23 @@ class BehavioralEngine:
                 "reasons"    : reason,
                 "correlated" : correlated,
             })
-            logger.info("Suspicious insertion: %s (penalty=%.0f)", reason, penalty)
+            logger.info("Doc-diff penalty: %s (−%.0f pts)", reason, penalty)
+
+    def _handle_external_hit(self, record: dict, ts: float) -> None:
+        """Called by ExternalChecker when a snippet matches web/Wikipedia content."""
+        source  = record.get("source", "unknown")
+        snippet = record.get("match_title", "")
+        self._stats.external_hits += 1
+        self._stats.suspicious_events += 1
+        self._stats.penalties         += PENALTY_EXTERNAL
+        self.suspicious_insertions.append({
+            "timestamp"  : ts,
+            "new_chars"  : record.get("chars_added", 0),
+            "penalty"    : PENALTY_EXTERNAL,
+            "reasons"    : [f"external source match ({source}): {snippet[:60]}"],
+            "correlated" : True,
+        })
+        logger.info("External source hit from %s: '%s' (−%d pts)", source, snippet[:60], PENALTY_EXTERNAL)
 
     def _recalc_score(self) -> None:
         raw = 100.0 - self._stats.penalties
