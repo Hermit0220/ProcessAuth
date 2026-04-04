@@ -20,17 +20,20 @@ class ParagraphState:
     index: int
     text_hash: str
     char_count: int
+    raw_text: str = ""
 
 
 @dataclass
 class DiffResult:
     timestamp: float = field(default_factory=time.time)
     new_chars: int = 0
+    deleted_chars: int = 0
     modified_paragraphs: int = 0
     deleted_paragraphs: int = 0
     added_paragraphs: int = 0
     large_insertion: bool = False   # > 150 chars in one snapshot diff
     suspicious: bool = False
+    new_texts: list[str] = field(default_factory=list)
 
 
 LARGE_INSERT_THRESHOLD = 150
@@ -48,6 +51,7 @@ def _parse_doc(doc_path: str) -> list[ParagraphState]:
                     index=i,
                     text_hash=sha256_text(text),
                     char_count=len(text),
+                    raw_text=text
                 )
             )
         return states
@@ -101,10 +105,13 @@ class DocParser:
                 result.new_chars += p.char_count
                 if p.char_count > LARGE_INSERT_THRESHOLD:
                     result.large_insertion = True
+                if p.char_count >= 80:
+                    result.new_texts.append(p.raw_text)
 
         for p in old:
             if p.text_hash not in new_hashes:
                 result.deleted_paragraphs += 1
+                result.deleted_chars += p.char_count
 
         # Modified = same index, different hash
         min_len = min(len(old), len(new))
@@ -113,7 +120,11 @@ class DocParser:
                 delta = new[i].char_count - old[i].char_count
                 if delta > 0:
                     result.new_chars += delta
+                elif delta < 0:
+                    result.deleted_chars += abs(delta)
                 result.modified_paragraphs += 1
+                if new[i].char_count >= 80:
+                    result.new_texts.append(new[i].raw_text)
 
         result.suspicious = result.large_insertion
         logger.debug(

@@ -134,7 +134,7 @@ class ConsentDialog(QDialog):
         self._btn_decline.setCursor(Qt.PointingHandCursor)
         self._btn_decline.clicked.connect(self._on_decline)
 
-        self._btn_agree = QPushButton("✓  Agree & Continue")
+        self._btn_agree = QPushButton("✓  Agree and Continue")
         self._btn_agree.setObjectName("BtnAgree")
         self._btn_agree.setFixedHeight(44)
         self._btn_agree.setCursor(Qt.PointingHandCursor)

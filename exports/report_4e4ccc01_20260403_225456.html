@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProcessAuth Report – {{ session_id[:8] }} · by Hermit</title>
+<title>ProcessAuth Report – 4e4ccc01 · by Hermit</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -195,7 +195,7 @@
 <div class="page-header">
   <div class="brand-tag"><span class="dot"></span> Behavioral Authentisizer · by Hermit <span class="dot"></span></div>
   <h1>Authenticity Analysis Report</h1>
-  <p class="subtitle">Session ID: {{ session_id }} &nbsp;·&nbsp; Generated {{ generated_at }}</p>
+  <p class="subtitle">Session ID: 4e4ccc01-7ccd-4877-8b21-8559b9c44ddb &nbsp;·&nbsp; Generated 2026-04-03 22:54:56</p>
   <p class="hermit-credit">ProcessAuth — Developed by <span>Hermit</span> · Behavioral Writing Intelligence</p>
 </div>
 
@@ -203,22 +203,22 @@
 <div class="grid-4">
   <div class="card">
     <h2>Total Words</h2>
-    <div class="stat-value">{{ stats.total_words }}</div>
+    <div class="stat-value">242</div>
     <div class="stat-label">across entire document</div>
   </div>
   <div class="card">
     <h2>Typed Words</h2>
-    <div class="stat-value" style="color:var(--green)">{{ stats.typed_words }}</div>
+    <div class="stat-value" style="color:var(--green)">38</div>
     <div class="stat-label">via keyboard</div>
   </div>
   <div class="card clickable" onclick="openModal('modal-pasted')">
     <h2>Pasted Words</h2>
-    <div class="stat-value" style="color:var(--yellow)">{{ stats.pasted_words }}</div>
+    <div class="stat-value" style="color:var(--yellow)">204</div>
     <div class="stat-label">detected insertions</div>
   </div>
   <div class="card clickable" onclick="openModal('modal-suspicious')">
     <h2>Suspicious Events</h2>
-    <div class="stat-value" style="color:var(--red)">{{ stats.suspicious_events }}</div>
+    <div class="stat-value" style="color:var(--red)">2</div>
     <div class="stat-label">flagged by engine</div>
   </div>
 </div>
@@ -231,22 +231,22 @@
       <div class="score-ring-wrap">
         <canvas id="scoreRing" width="150" height="150"></canvas>
         <div class="score-center">
-          <div class="score-number" style="color:{{ score_color }}">{{ stats.authenticity_score | int }}</div>
+          <div class="score-number" style="color:#22c55e">95</div>
           <div class="score-pct">/ 100</div>
         </div>
       </div>
       <div style="text-align:center;margin-top:.5rem">
-        <span class="badge {{ score_badge }}">{{ score_label }}</span>
+        <span class="badge badge-green">High Authenticity</span>
       </div>
       <table style="margin-top:1rem;font-size:.8rem">
-        <tr><td style="color:var(--muted)">Total keystrokes</td><td style="text-align:right">{{ stats.total_keystrokes }}</td></tr>
-        <tr><td style="color:var(--muted)">Backspaces</td><td style="text-align:right">{{ stats.backspaces }}</td></tr>
-        <tr><td style="color:var(--muted)">Clipboard events</td><td style="text-align:right">{{ stats.paste_events }}</td></tr>
-        <tr><td style="color:var(--muted)">External web hits</td><td style="text-align:right;color:var(--pink)">{{ stats.external_hits }}</td></tr>
-        <tr><td style="color:var(--muted)">Total penalty</td><td style="text-align:right;color:var(--red)">−{{ stats.penalties }}</td></tr>
-        <tr><td style="color:var(--muted)">Avg typing speed</td><td style="text-align:right">{{ stats.avg_typing_speed }} cpm</td></tr>
-        <tr><td style="color:var(--muted)">Session duration</td><td style="text-align:right">{{ duration }}</td></tr>
-        <tr><td style="color:var(--muted)">Document</td><td style="text-align:right;font-size:.7rem;color:var(--muted)">{{ doc_name }}</td></tr>
+        <tr><td style="color:var(--muted)">Total keystrokes</td><td style="text-align:right">192</td></tr>
+        <tr><td style="color:var(--muted)">Backspaces</td><td style="text-align:right">20</td></tr>
+        <tr><td style="color:var(--muted)">Clipboard events</td><td style="text-align:right">1</td></tr>
+        <tr><td style="color:var(--muted)">External web hits</td><td style="text-align:right;color:var(--pink)">1</td></tr>
+        <tr><td style="color:var(--muted)">Total penalty</td><td style="text-align:right;color:var(--red)">−5.0</td></tr>
+        <tr><td style="color:var(--muted)">Avg typing speed</td><td style="text-align:right">292.29 cpm</td></tr>
+        <tr><td style="color:var(--muted)">Session duration</td><td style="text-align:right">1m 56s</td></tr>
+        <tr><td style="color:var(--muted)">Document</td><td style="text-align:right;font-size:.7rem;color:var(--muted)">Testing.docx</td></tr>
       </table>
     </div>
   </div>
@@ -267,7 +267,7 @@
   <p class="section-title">Suspicious Insertion Events
     <span style="font-size:.75rem;color:var(--muted);font-weight:400">— click any chip or preview to expand</span>
   </p>
-  {% if suspicious_insertions %}
+  
   <table>
     <thead>
       <tr>
@@ -280,97 +280,98 @@
       </tr>
     </thead>
     <tbody>
-      {% for ev in suspicious_insertions %}
-      {% set ev_idx = loop.index0 %}
+      
+      
       <tr>
-        <td style="font-family:monospace;color:var(--cyan);white-space:nowrap">{{ ev.time_str }}</td>
-        <td>{{ ev.new_chars if ev.new_chars else "—" }}</td>
-        <td style="color:var(--red);font-weight:700">−{{ ev.penalty }}</td>
+        <td style="font-family:monospace;color:var(--cyan);white-space:nowrap">22:54:20</td>
+        <td>1022</td>
+        <td style="color:var(--red);font-weight:700">−0.0</td>
         <td>
-          {% if ev.correlated %}
+          
             <span class="badge badge-red">Yes</span>
-          {% else %}
-            <span class="badge badge-yellow">No</span>
-          {% endif %}
-          {% if ev.content_type == "image" %}
-            <span class="badge badge-image" style="margin-top:4px;display:inline-block">🖼 Image</span>
-          {% elif ev.content_type in ("url", "url_in_text") %}
-            <span class="badge badge-cyan" style="margin-top:4px;display:inline-block">🔗 URL</span>
-          {% elif ev.content_type == "external" %}
-            <span class="badge badge-pink" style="margin-top:4px;display:inline-block">🌐 Web</span>
-          {% endif %}
+          
+          
         </td>
         <td>
-          {% for reason in ev.reasons %}
+          
           <span class="reason-chip"
-            onclick="openReasonModal('{{ reason | replace("'","&#39;") }}', {{ ev_idx }})">
-            ⚠ {{ reason }}
+            onclick="openReasonModal('very large clipboard content (1022 chars)', 0)">
+            ⚠ very large clipboard content (1022 chars)
           </span>
-          {% endfor %}
+          
         </td>
         <td class="content-preview">
-          {% if ev.content_type == "image" %}
-            <div class="img-preview-badge">🖼️ {{ ev.snippet }}</div>
-          {% elif ev.snippet %}
-            <div class="preview-text" id="pt-{{ ev_idx }}"
-                 onclick="togglePreview({{ ev_idx }})">{{ ev.snippet }}</div>
-            <button class="preview-expand-btn" id="pb-{{ ev_idx }}"
-                    onclick="togglePreview({{ ev_idx }})">▼ expand</button>
-          {% else %}
-            <span style="color:#1e3a4a;font-size:.75rem">No content captured</span>
-          {% endif %}
-          {% if ev.urls %}
-            <ul class="url-list" style="margin-top:.4rem">
-              {% for url in ev.urls %}
-              <li>
-                <a class="url-link" href="{{ url }}" target="_blank" rel="noopener">
-                  <span class="url-icon">🔗</span>{{ url[:60] }}{% if url|length > 60 %}…{% endif %}
-                </a>
-              </li>
-              {% endfor %}
-            </ul>
-          {% endif %}
+          
+            <div class="preview-text" id="pt-0"
+                 onclick="togglePreview(0)">Three Studies for Figures at the Base of a Crucifixion is a 1944 triptych painted by Francis Bacon. The canvasses are based on the Eumenides—or Furies—of Aeschylus's Oresteia and depict three writhing anthropomorphic creatures set against a flat burnt orange background. It was executed in oil paint and pastel on fibreboard and completed within two </div>
+            <button class="preview-expand-btn" id="pb-0"
+                    onclick="togglePreview(0)">▼ expand</button>
+          
+          
         </td>
       </tr>
-      {% endfor %}
+      
+      
+      <tr>
+        <td style="font-family:monospace;color:var(--cyan);white-space:nowrap">22:54:20</td>
+        <td>1022</td>
+        <td style="color:var(--red);font-weight:700">−5</td>
+        <td>
+          
+            <span class="badge badge-red">Yes</span>
+          
+          
+            <span class="badge badge-pink" style="margin-top:4px;display:inline-block">🌐 Web</span>
+          
+        </td>
+        <td>
+          
+          <span class="reason-chip"
+            onclick="openReasonModal('external source match (duckduckgo): en.wikipedia.org/wiki/Three_Studies_for_Figures_at_the_Base_of_a_Crucifixion', 1)">
+            ⚠ external source match (duckduckgo): en.wikipedia.org/wiki/Three_Studies_for_Figures_at_the_Base_of_a_Crucifixion
+          </span>
+          
+        </td>
+        <td class="content-preview">
+          
+            <div class="preview-text" id="pt-1"
+                 onclick="togglePreview(1)"><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Three Studies for Figures at the Base of a Crucifixion </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">is a 1944 triptych painted by </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Francis </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Bacon. </mark>The canvasses<mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;"> are </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">based on the </mark>Eumenides—or Furies—of Aeschylus's Oresteia and depict<mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;"> three </mark>writhing anthropomorphic creatures set against a flat burnt orange background. It was executed in oil paint and pastel on fibreboard and completed within two </div>
+            <button class="preview-expand-btn" id="pb-1"
+                    onclick="togglePreview(1)">▼ expand</button>
+          
+          
+        </td>
+      </tr>
+      
     </tbody>
   </table>
-  {% else %}
-  <p style="color:var(--muted);font-size:.85rem">No suspicious insertion events detected.</p>
-  {% endif %}
+  
 </div>
 
 <!-- PLAGIARISM & SOURCE CHECK -->
-{% set plag_hits = suspicious_insertions | selectattr("content_type", "equalto", "external") | list %}
-{% if plag_hits %}
+
+
 <div class="card" style="margin-bottom:1.5rem; border: 1px solid rgba(236, 72, 153, 0.3);">
   <p class="section-title" style="color:var(--pink);">Plagiarism & Source Check <span style="font-size:.75rem;color:var(--muted);font-weight:400">— Identical word-by-word matches found on the web</span></p>
-  {% for hit in plag_hits %}
+  
   <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--pink);">
     <div style="font-size: .85rem; color: #94a3b8; margin-bottom: .8rem;">
-      <strong style="color: #e2e8f0;">Source URL:</strong> <a href="{{ hit.source_url }}" target="_blank" style="color: var(--cyan); text-decoration: none; word-break: break-all;">{{ hit.source_url }}</a><br>
-      <strong style="color: #e2e8f0;">Length:</strong> {{ hit.new_chars }} characters<br>
+      <strong style="color: #e2e8f0;">Source URL:</strong> <a href="" target="_blank" style="color: var(--cyan); text-decoration: none; word-break: break-all;"></a><br>
+      <strong style="color: #e2e8f0;">Length:</strong> 1022 characters<br>
     </div>
     <div style="font-family: Arial, sans-serif; font-size: .9rem; color: #cbd5e1; line-height: 1.7; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; max-height: 400px; overflow-y: auto;">
-      {{ hit.snippet | safe }}
+      <mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Three Studies for Figures at the Base of a Crucifixion </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">is a 1944 triptych painted by </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Francis </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">Bacon. </mark>The canvasses<mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;"> are </mark><mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">based on the </mark>Eumenides—or Furies—of Aeschylus's Oresteia and depict<mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;"> three </mark>writhing anthropomorphic creatures set against a flat burnt orange background. It was executed in oil paint and pastel on fibreboard and completed within two 
     </div>
   </div>
-  {% endfor %}
+  
 </div>
-{% endif %}
+
 
 <!-- EVENT TIMELINE -->
 <div class="card" style="margin-bottom:1.5rem">
   <p class="section-title">Event Log <span style="font-size:.75rem;color:var(--muted);font-weight:400">(last 50 non-keystroke events)</span></p>
   <ul class="timeline-list">
-    {% for ev in timeline %}
-    <li>
-      <span class="tl-time">{{ ev.time_str }}</span>
-      <span class="tl-type">{{ ev.event_type }}</span>
-      <span class="tl-detail">{{ ev.detail }}</span>
-      {% if ev.suspicious %}<span class="badge badge-red" style="white-space:nowrap">⚠ Suspicious</span>{% endif %}
-    </li>
-    {% endfor %}
+    
   </ul>
 </div>
 
@@ -378,11 +379,11 @@
 <div class="card" style="margin-bottom:2rem">
   <p class="section-title">Session Integrity Hash</p>
   <p style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem">SHA-256 fingerprint of all logged events. Any tampering changes this value.</p>
-  <div class="hash-box">{{ integrity_hash }}</div>
+  <div class="hash-box">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
 </div>
 
 <div style="text-align:center;padding:2rem 0 1rem;color:#0f2027;font-size:.72rem;letter-spacing:.08em">
-  ProcessAuth &copy; {{ year }} &nbsp;·&nbsp; Behavioral Writing Authentisizer by <span style="color:#164e63">Hermit</span> &nbsp;·&nbsp; For authorized use only
+  ProcessAuth &copy; 2026 &nbsp;·&nbsp; Behavioral Writing Authentisizer by <span style="color:#164e63">Hermit</span> &nbsp;·&nbsp; For authorized use only
 </div>
 
 
@@ -479,29 +480,39 @@
 <script>
 // Serialise suspicious events for JS access
 const EVENTS = [
-  {% for ev in suspicious_insertions %}
+  
   {
-    snippet: {{ ev.snippet | tojson }},
-    content_type: {{ ev.content_type | tojson }},
-    urls: {{ ev.urls | tojson }},
-    reasons: {{ ev.reasons | tojson }},
-    penalty: {{ ev.penalty }},
-    new_chars: {{ ev.new_chars }},
-    time_str: {{ ev.time_str | tojson }},
+    snippet: "Three Studies for Figures at the Base of a Crucifixion is a 1944 triptych painted by Francis Bacon. The canvasses are based on the Eumenides\u2014or Furies\u2014of Aeschylus\u0027s Oresteia and depict three writhing anthropomorphic creatures set against a flat burnt orange background. It was executed in oil paint and pastel on fibreboard and completed within two ",
+    content_type: "text",
+    urls: [],
+    reasons: ["very large clipboard content (1022 chars)"],
+    penalty: 0.0,
+    new_chars: 1022,
+    time_str: "22:54:20",
   },
-  {% endfor %}
+  
+  {
+    snippet: "\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003eThree Studies for Figures at the Base of a Crucifixion \u003c/mark\u003e\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003eis a 1944 triptych painted by \u003c/mark\u003e\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003eFrancis \u003c/mark\u003e\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003eBacon. \u003c/mark\u003eThe canvasses\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003e are \u003c/mark\u003e\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003ebased on the \u003c/mark\u003eEumenides\u2014or Furies\u2014of Aeschylus\u0027s Oresteia and depict\u003cmark style=\"background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;\"\u003e three \u003c/mark\u003ewrithing anthropomorphic creatures set against a flat burnt orange background. It was executed in oil paint and pastel on fibreboard and completed within two ",
+    content_type: "external",
+    urls: [],
+    reasons: ["external source match (duckduckgo): en.wikipedia.org/wiki/Three_Studies_for_Figures_at_the_Base_of_a_Crucifixion"],
+    penalty: 5,
+    new_chars: 1022,
+    time_str: "22:54:20",
+  },
+  
 ];
 
 // ── Chart.js ─────────────────────────────────────────────────────────────────
-const scoreVal = {{ stats.authenticity_score }};
-const scoreColor = '{{ score_color }}';
+const scoreVal = 95.0;
+const scoreColor = '#22c55e';
 new Chart(document.getElementById('scoreRing'), {
   type:'doughnut',
   data:{datasets:[{data:[scoreVal,100-scoreVal],backgroundColor:[scoreColor,'rgba(255,255,255,.05)'],borderWidth:0}]},
   options:{cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{animateRotate:true,duration:1200}}
 });
 
-const speedData = {{ speed_timeline | tojson }};
+const speedData = [40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 280.0, 280.0, 320.0, 360.0, 360.0, 360.0, 400.0, 360.0, 280.0, 280.0, 120.0, 160.0, 200.0, 200.0, 200.0, 240.0, 280.0, 320.0, 360.0, 320.0, 320.0, 360.0, 400.0, 360.0, 360.0, 360.0, 360.0, 320.0, 360.0, 360.0, 360.0, 400.0, 440.0, 440.0, 480.0, 360.0, 400.0, 400.0, 400.0, 240.0, 240.0, 120.0, 160.0, 160.0, 200.0, 200.0, 240.0, 280.0, 200.0, 240.0, 200.0, 160.0, 200.0, 240.0, 200.0, 240.0, 280.0, 280.0, 280.0, 280.0, 320.0, 360.0, 360.0, 400.0, 440.0, 240.0, 240.0, 280.0, 280.0, 320.0, 320.0, 280.0, 280.0, 280.0, 240.0, 240.0, 240.0, 280.0, 280.0, 320.0, 320.0, 360.0, 320.0, 280.0, 280.0, 320.0, 320.0, 320.0, 320.0, 320.0, 360.0, 360.0, 360.0, 400.0, 360.0, 400.0, 440.0, 480.0, 360.0, 360.0, 360.0, 280.0, 280.0, 280.0, 160.0, 200.0, 240.0, 240.0, 200.0, 80.0, 120.0, 160.0, 160.0, 200.0, 240.0, 280.0, 320.0, 360.0, 360.0, 280.0, 200.0, 240.0, 240.0, 280.0, 280.0, 280.0, 320.0, 320.0, 360.0, 400.0, 400.0, 280.0, 320.0, 360.0, 360.0, 400.0, 360.0, 320.0, 360.0, 360.0, 400.0, 440.0, 480.0, 520.0, 520.0, 440.0, 400.0, 320.0, 360.0, 200.0, 240.0, 240.0, 280.0, 320.0, 320.0, 320.0, 320.0, 360.0, 320.0, 320.0, 320.0, 320.0, 360.0, 360.0, 400.0, 320.0, 360.0, 320.0, 320.0, 200.0, 240.0, 280.0, 320.0, 320.0, 200.0, 160.0, 40.0, 80.0, 40.0, 80.0, 120.0, 160.0, 200.0, 240.0, 280.0];
 new Chart(document.getElementById('speedChart'), {
   type:'line',
   data:{labels:speedData.map((_,i)=>i+1),datasets:[{label:'Chars/min',data:speedData,borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.08)',fill:true,tension:.4,pointRadius:0}]},
@@ -510,7 +521,7 @@ new Chart(document.getElementById('speedChart'), {
 
 new Chart(document.getElementById('activityChart'), {
   type:'bar',
-  data:{labels:['Typed Chars','Pasted Chars','Backspaces'],datasets:[{data:[{{ stats.total_chars_typed }},{{ stats.total_chars_pasted }},{{ stats.backspaces }}],backgroundColor:['rgba(6,182,212,.6)','rgba(234,179,8,.6)','rgba(139,92,246,.4)'],borderColor:['#06b6d4','#eab308','#8b5cf6'],borderWidth:1,borderRadius:6}]},
+  data:{labels:['Typed Chars','Pasted Chars','Backspaces'],datasets:[{data:[192,1022,20],backgroundColor:['rgba(6,182,212,.6)','rgba(234,179,8,.6)','rgba(139,92,246,.4)'],borderColor:['#06b6d4','#eab308','#8b5cf6'],borderWidth:1,borderRadius:6}]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:10}}}}}
 });
 

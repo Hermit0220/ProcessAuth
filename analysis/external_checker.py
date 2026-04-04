@@ -4,13 +4,13 @@ analysis/external_checker.py
 Checks clipboard snippets against free, public web APIs to detect if pasted
 content originates from an external online source.
 
-APIs used (both are completely free — no API key required):
-  1. DuckDuckGo Instant Answer API
-     https://api.duckduckgo.com/?q={query}&format=json&no_html=1
+APIs/Sources used (all free):
+  1. DuckDuckGo HTML web search (`html.duckduckgo.com`)
+     Used to find exact quote matches across the *entire* web.
   2. Wikipedia Search API
-     https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={q}&format=json
+     Fallback exact match on Wikipedia articles.
 
-Both are: no authentication, no signup, rate-limited by IP (~1 req/s is safe).
+Both are rate-limited by IP (~1 req/s is safe).
 """
 import threading
 import time
@@ -106,9 +106,9 @@ class ExternalChecker:
             probe = self._build_probe(snippet)
             logger.debug("ExternalChecker probe: '%s…'", probe[:40])
 
-            hit = self._query_duckduckgo(probe)
+            hit = self._query_duckduckgo(probe, snippet)
             if not hit:
-                hit = self._query_wikipedia(probe)
+                hit = self._query_wikipedia(probe, snippet)
 
             self._last_req = time.monotonic()
 
@@ -120,6 +120,8 @@ class ExternalChecker:
                     "chars_added" : chars_len,
                     "source"      : hit["source"],
                     "match_title" : hit["title"],
+                    "_snippet"    : snippet,       # in-memory only
+                    "highlighted_html": hit.get("highlighted_html", snippet),
                     "clipboard"   : 1,
                     "typing_speed": 0.0,
                     "suspicion"   : 1,
@@ -144,37 +146,95 @@ class ExternalChecker:
                 return text[: idx + 1].strip()
         return text[:PROBE_LEN].strip()
 
-    def _query_duckduckgo(self, probe: str) -> dict | None:
+    def _query_duckduckgo(self, probe: str, snippet: str) -> dict | None:
         """
-        DuckDuckGo Instant Answer API — free, no key.
-        Returns a hit dict if the probe matches a known topic.
+        DuckDuckGo HTML query — finds exact quote matches across the web.
         """
         try:
+            # We search for the exact quote to see if it's ripped from a site
             q   = urllib.parse.quote_plus(f'"{probe}"')
-            url = f"https://api.duckduckgo.com/?q={q}&format=json&no_html=1&skip_disambig=1"
-            req = urllib.request.Request(url, headers={"User-Agent": "ProcessAuth/1.0"})
+            url = "https://html.duckduckgo.com/html/"
+            data = urllib.parse.urlencode({"q": q}).encode("utf-8")
+            # DuckDuckGo requires a real-looking User-Agent
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0"
+            }
+            req = urllib.request.Request(url, data=data, headers=headers)
             with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
-                data = json.loads(resp.read().decode("utf-8", errors="replace"))
+                html = resp.read().decode("utf-8", errors="replace")
 
-            abstract = data.get("Abstract", "").strip()
-            title    = data.get("Heading", "").strip()
-
-            if abstract and title:
-                return {"source": "duckduckgo", "title": title}
-
-            # RelatedTopics fallback
-            topics = data.get("RelatedTopics", [])
-            if topics and isinstance(topics[0], dict):
-                text = topics[0].get("Text", "")
-                if len(text) > 30:
-                    return {"source": "duckduckgo", "title": text[:80]}
+            # Basic scrape — if there is a result snippet, it means a match was found.
+            # We extract the title roughly using string ops to avoid external HTML parser dependency.
+            if "result__snippet" in html:
+                title = "Web Match Found"
+                try:
+                    start_title = html.find('class="result__title"')
+                    if start_title != -1:
+                        a_start = html.find('<a class="result__url"', start_title)
+                        if a_start != -1:
+                            href_end = html.find('>', a_start)
+                            end_tag = html.find('</a>', href_end)
+                            raw_url = html[href_end+1:end_tag].strip()
+                            if raw_url:
+                                title = raw_url.replace(" ", "").replace("\n", "")
+                except Exception:
+                    pass
+                
+                # Fetch contents of the matched URL and generate highlight
+                highlighted_html = self._fetch_and_highlight(title, snippet)
+                
+                return {"source": "duckduckgo", "title": title, "highlighted_html": highlighted_html}
 
         except Exception as exc:
-            logger.debug("DuckDuckGo query failed: %s", exc)
+            logger.debug("DuckDuckGo HTML query failed: %s", exc)
 
         return None
 
-    def _query_wikipedia(self, probe: str) -> dict | None:
+    def _fetch_and_highlight(self, url: str, snippet: str) -> str:
+        """Download remote webpage and highlight exact word matches against the copied snippet."""
+        if not url.startswith("http"):
+            url = f"https://{url}"
+        
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
+                html = resp.read().decode("utf-8", errors="ignore")
+                
+            import re
+            body = re.search(r'<body[^>]*>(.*?)</body>', html, re.IGNORECASE | re.DOTALL)
+            text = body.group(1) if body else html
+            
+            text = re.sub(r'<script.*?>.*?</script>', ' ', text, flags=re.IGNORECASE | re.DOTALL)
+            text = re.sub(r'<style.*?>.*?</style>', ' ', text, flags=re.IGNORECASE | re.DOTALL)
+            text = re.sub(r'<[^>]+>', ' ', text)
+            web_text = re.sub(r'\s+', ' ', text).strip()
+            
+            return self._highlight_matches(snippet, web_text)
+        except Exception as exc:
+            logger.debug("Failed to fetch/highlight URL %s: %s", url, exc)
+            return self._highlight_matches(snippet, snippet) # fallback: highlight entirely
+
+    def _highlight_matches(self, pasted_text: str, web_text: str) -> str:
+        import difflib
+        import re
+        pasted_tokens = [t for t in re.split(r'(\s+)', pasted_text) if t]
+        web_tokens = [t for t in re.split(r'(\s+)', web_text) if t]
+        
+        sm = difflib.SequenceMatcher(None, [t.lower() for t in pasted_tokens], [t.lower() for t in web_tokens])
+        out = []
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            chunk = ''.join(pasted_tokens[i1:i2])
+            if not chunk: continue
+            if tag == 'equal':
+                if chunk.strip():
+                    out.append(f'<mark style="background-color: #f472b6; color: #111827; padding: 0 1px; border-radius: 2px;">{chunk}</mark>')
+                else:
+                    out.append(chunk)
+            else:
+                out.append(chunk)
+        return ''.join(out)
+
+    def _query_wikipedia(self, probe: str, snippet: str) -> dict | None:
         """
         Wikipedia Search API — free, no key.
         Returns a hit dict if the probe matches a Wikipedia article.
@@ -199,7 +259,9 @@ class ExternalChecker:
                 snip_words  = set(snippet.lower().split())
                 overlap = len(probe_words & snip_words) / max(len(probe_words), 1)
                 if overlap > 0.45:   # >45% word overlap → likely match
-                    return {"source": "wikipedia", "title": title}
+                    wiki_url = f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}"
+                    highlighted_html = self._fetch_and_highlight(wiki_url, snippet)
+                    return {"source": "wikipedia", "title": wiki_url, "highlighted_html": highlighted_html}
 
         except Exception as exc:
             logger.debug("Wikipedia query failed: %s", exc)

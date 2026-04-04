@@ -94,11 +94,14 @@ def generate_report(
     # Build suspicious insertions for template
     tmpl_suspicious = [
         {
-            "time_str"  : _fmt_time(ev["timestamp"]),
-            "new_chars" : ev.get("new_chars", ev.get("chars_added", 0)),
-            "penalty"   : ev["penalty"],
-            "correlated": ev["correlated"],
-            "reasons"   : ev["reasons"],
+            "time_str"    : _fmt_time(ev["timestamp"]),
+            "new_chars"   : ev.get("new_chars", ev.get("chars_added", 0)),
+            "penalty"     : ev["penalty"],
+            "correlated"  : ev["correlated"],
+            "reasons"     : ev["reasons"],
+            "snippet"     : ev.get("snippet", ""),
+            "content_type": ev.get("content_type", "text"),
+            "urls"        : ev.get("urls", []),
         }
         for ev in suspicious_insertions
     ]

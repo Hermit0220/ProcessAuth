@@ -28,26 +28,28 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 # ── Clipboard direct-penalty thresholds ──────────────────────────────────────
-CLIP_SMALL        = 150    # chars — below this: no direct penalty
-CLIP_MED          = 300    # chars
-CLIP_LARGE        = 600    # chars
-PENALTY_CLIP_MED  = 5
-PENALTY_CLIP_LRG  = 10
-PENALTY_CLIP_XLG  = 18
-PENALTY_CLIP_BURST = 5     # if two large pastes within 3 s
+CLIP_SMALL         = 150    # chars — below this: no direct penalty
+CLIP_MED           = 300    # chars
+CLIP_LARGE         = 600    # chars
+PENALTY_CLIP_MED   = 0
+PENALTY_CLIP_LRG   = 0
+PENALTY_CLIP_XLG   = 0
+PENALTY_CLIP_BURST = 0     # if two large pastes within 3 s
+PENALTY_URL_PASTE  = 0     # extra for pasting a bare URL — strong web signal
+PENALTY_IMAGE_PASTE= 0     # pasting an image from clipboard
 CLIP_BURST_WINDOW  = 3.0   # seconds
 
 # ── Doc-diff thresholds ──────────────────────────────────────────────────────
 CLIPBOARD_WINDOW   = 2.0
 TIER2_THRESHOLD    = 60
 TIER3_THRESHOLD    = 200
-PENALTY_TIER2      = 5
-PENALTY_TIER3      = 15
-PENALTY_CORRELATED = 10
-PENALTY_BLOCK_INS  = 10
+PENALTY_TIER2      = 0
+PENALTY_TIER3      = 0
+PENALTY_CORRELATED = 0
+PENALTY_BLOCK_INS  = 0
 
 # ── External source penalty ──────────────────────────────────────────────────
-PENALTY_EXTERNAL   = 10
+PENALTY_EXTERNAL   = 5
 
 
 @dataclass
@@ -100,6 +102,8 @@ class BehavioralEngine:
         self._large_clip_times: list[float] = []
         # Suspicious insertions for final report
         self.suspicious_insertions: list[dict] = []
+        # Penalties that are immune to refund (e.g. pasted images)
+        self._non_refundable_penalties = 0.0
 
     # ── public API ─────────────────────────────────────────────────────────────
 
@@ -143,23 +147,50 @@ class BehavioralEngine:
     def _handle_clipboard(self, record: dict, ts: float) -> None:
         """
         Apply DIRECT score penalties based on clipboard content size.
-        This fires immediately on paste — does NOT wait for the .docx to be saved.
+        Fires immediately on paste — does NOT wait for the .docx to be saved.
+        Stores snippet + content_type for report rendering.
         """
         self._clipboard_times.append(ts)
-        approx_len = record.get("_approx_len", record.get("chars_added", 0))
+        approx_len   = record.get("_approx_len", record.get("chars_added", 0))
+        content_type = record.get("_content_type", "text")
+        snippet      = record.get("_snippet", "")
+        urls         = record.get("_urls", [])
 
-        if approx_len < CLIP_SMALL:
-            # Small copy — no penalty (could be copying a word within the doc)
+        # ── Image in clipboard ─────────────────────────────────────────────────
+        if content_type == "image":
+            self._stats.paste_events       += 1
+            self._stats.suspicious_events  += 1
+            self._stats.penalties          += PENALTY_IMAGE_PASTE
+            self._non_refundable_penalties += PENALTY_IMAGE_PASTE
+            reason = [f"image pasted from clipboard ({snippet})"]
+            self.suspicious_insertions.append({
+                "timestamp"    : ts,
+                "new_chars"    : 0,
+                "penalty"      : PENALTY_IMAGE_PASTE,
+                "reasons"      : reason,
+                "correlated"   : True,
+                "snippet"      : snippet,
+                "content_type" : "image",
+                "urls"         : [],
+            })
+            logger.info("Image clipboard penalty: %s", snippet)
             return
 
-        self._stats.paste_events += 1
+        # ── Text too small — no penalty ────────────────────────────────────────
+        if approx_len < CLIP_SMALL and content_type not in ("url", "url_in_text"):
+            return
+
+        self._stats.paste_events       += 1
         self._stats.total_chars_pasted += approx_len
 
-        # Determine base penalty by size
         penalty = 0.0
         reason  = []
 
-        if approx_len > CLIP_LARGE:
+        # Base size penalty
+        if content_type in ("url", "url_in_text"):
+            penalty += PENALTY_URL_PASTE
+            reason.append(f"URL(s) pasted from clipboard ({len(urls)} link(s) detected)")
+        elif approx_len > CLIP_LARGE:
             penalty += PENALTY_CLIP_XLG
             reason.append(f"very large clipboard content ({approx_len} chars)")
         elif approx_len > CLIP_MED:
@@ -169,7 +200,7 @@ class BehavioralEngine:
             penalty += PENALTY_CLIP_MED
             reason.append(f"medium clipboard content ({approx_len} chars)")
 
-        # Burst check: another large paste within the burst window
+        # Burst check
         recent_large = [t for t in self._large_clip_times if ts - t <= CLIP_BURST_WINDOW]
         if recent_large:
             penalty += PENALTY_CLIP_BURST
@@ -180,13 +211,16 @@ class BehavioralEngine:
         self._stats.penalties         += penalty
 
         self.suspicious_insertions.append({
-            "timestamp"  : ts,
-            "new_chars"  : approx_len,
-            "penalty"    : penalty,
-            "reasons"    : reason,
-            "correlated" : True,  # clipboard IS the evidence here
+            "timestamp"    : ts,
+            "new_chars"    : approx_len,
+            "penalty"      : penalty,
+            "reasons"      : reason,
+            "correlated"   : True,
+            "snippet"      : snippet,
+            "content_type" : content_type,
+            "urls"         : urls,
         })
-        logger.info("Clipboard penalty: %s  (−%.0f pts)", reason, penalty)
+        logger.info("Clipboard penalty: %s (-%.0f pts)", reason, penalty)
 
     def _handle_diff(self, record: dict, ts: float) -> None:
         """
@@ -194,11 +228,33 @@ class BehavioralEngine:
         Avoids double-counting chars already penalised by clipboard event.
         """
         new_chars    = record.get("new_chars", 0)
+        deleted_chars= record.get("deleted_chars", 0)
         large_insert = record.get("large_insertion", False)
 
         penalty = 0.0
         reason  = []
 
+        # ── Deletion Refund Logic ────────────────────────────────────────────────
+        if deleted_chars > 0:
+            refund = (deleted_chars / 50.0) * 1.5
+            max_refundable = max(0.0, self._stats.penalties - self._non_refundable_penalties)
+            actual_refund = min(refund, max_refundable)
+            
+            if actual_refund > 0:
+                self._stats.penalties -= actual_refund
+                logger.info("Refunded %.1f pts from %d deleted chars", actual_refund, deleted_chars)
+                self.suspicious_insertions.append({
+                    "timestamp"    : ts,
+                    "new_chars"    : -deleted_chars,
+                    "penalty"      : -round(actual_refund, 1),
+                    "reasons"      : [f"Refund: deleted {deleted_chars} characters"],
+                    "correlated"   : False,
+                    "snippet"      : "",
+                    "content_type" : "text",
+                    "urls"         : [],
+                })
+
+        # ── Insert Logic ─────────────────────────────────────────────────────────
         if new_chars > TIER3_THRESHOLD:
             penalty += PENALTY_TIER3
             reason.append(f"Tier-3 doc insert ({new_chars} chars)")
@@ -206,12 +262,10 @@ class BehavioralEngine:
             penalty += PENALTY_TIER2
             reason.append(f"Tier-2 doc insert ({new_chars} chars)")
 
-        # Extra penalty only if clipboard was NOT the trigger (unexpected block)
         correlated = any(
             abs(ts - ct) <= CLIPBOARD_WINDOW for ct in self._clipboard_times
         )
         if correlated and large_insert:
-            # Clipboard already penalised — just log, no extra hit
             reason.append("clipboard-correlated diff (already penalised)")
         elif large_insert and not correlated:
             penalty += PENALTY_BLOCK_INS
@@ -221,29 +275,39 @@ class BehavioralEngine:
             self._stats.suspicious_events += 1
             self._stats.penalties         += penalty
             self.suspicious_insertions.append({
-                "timestamp"  : ts,
-                "new_chars"  : new_chars,
-                "penalty"    : penalty,
-                "reasons"    : reason,
-                "correlated" : correlated,
+                "timestamp"    : ts,
+                "new_chars"    : new_chars,
+                "penalty"      : penalty,
+                "reasons"      : reason,
+                "correlated"   : correlated,
+                "snippet"      : "",
+                "content_type" : "text",
+                "urls"         : [],
             })
-            logger.info("Doc-diff penalty: %s (−%.0f pts)", reason, penalty)
+            logger.info("Doc-diff penalty: %s (-%.0f pts)", reason, penalty)
 
     def _handle_external_hit(self, record: dict, ts: float) -> None:
         """Called by ExternalChecker when a snippet matches web/Wikipedia content."""
         source  = record.get("source", "unknown")
-        snippet = record.get("match_title", "")
-        self._stats.external_hits += 1
+        title   = record.get("match_title", "")
+        snippet = record.get("_snippet", "")
+        highlight = record.get("highlighted_html", snippet)
+        
+        self._stats.external_hits     += 1
         self._stats.suspicious_events += 1
         self._stats.penalties         += PENALTY_EXTERNAL
         self.suspicious_insertions.append({
-            "timestamp"  : ts,
-            "new_chars"  : record.get("chars_added", 0),
-            "penalty"    : PENALTY_EXTERNAL,
-            "reasons"    : [f"external source match ({source}): {snippet[:60]}"],
-            "correlated" : True,
+            "timestamp"    : ts,
+            "new_chars"    : record.get("chars_added", 0),
+            "penalty"      : PENALTY_EXTERNAL,
+            "reasons"      : [f"external source match ({source}): {title[:120]}"],
+            "correlated"   : True,
+            "snippet"      : highlight,
+            "content_type" : "external",
+            "urls"         : [],
+            "source_url"   : title,
         })
-        logger.info("External source hit from %s: '%s' (−%d pts)", source, snippet[:60], PENALTY_EXTERNAL)
+        logger.info("External hit: %s — '%s' (-%d pts)", source, title[:60], PENALTY_EXTERNAL)
 
     def _recalc_score(self) -> None:
         raw = 100.0 - self._stats.penalties

@@ -239,11 +239,10 @@ class Dashboard(QMainWindow):
         btn_min.setCursor(Qt.PointingHandCursor)
         btn_min.setStyleSheet("""
             QPushButton {
-                background: rgba(255,255,255,0.07);
-                color: #94a3b8;
-                border: 1px solid rgba(255,255,255,0.12);
+                background: rgba(30,30,40, 200);
+                border: 1px solid rgba(255,255,255,10);
+                padding: 10px;
                 border-radius: 8px;
-                font-size: 14px;
                 font-weight: 700;
             }
             QPushButton:hover {

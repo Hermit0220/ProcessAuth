@@ -133,6 +133,15 @@ class SessionManager:
             "suspicious"     : diff.suspicious,
         }
         self._event_queue.put(record)
+        
+        # Submit naturally typed text blocks (paragraphs >= 80 chars) to plagiarism checker
+        if getattr(diff, "new_texts", None):
+            for snippet in diff.new_texts:
+                self._ext_checker.submit(
+                    snippet=snippet,
+                    chars_len=len(snippet),
+                    timestamp=diff.timestamp,
+                )
 
     def _dispatch_loop(self) -> None:
         while self._running:
