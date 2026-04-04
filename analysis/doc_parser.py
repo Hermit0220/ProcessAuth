@@ -34,6 +34,8 @@ class DiffResult:
     large_insertion: bool = False   # > 150 chars in one snapshot diff
     suspicious: bool = False
     new_texts: list[str] = field(default_factory=list)
+    new_images: int = 0
+    new_urls: list[str] = field(default_factory=list)
 
 
 LARGE_INSERT_THRESHOLD = 150
@@ -54,10 +56,10 @@ def _parse_doc(doc_path: str) -> list[ParagraphState]:
                     raw_text=text
                 )
             )
-        return states
+        return states, len(doc.inline_shapes) if hasattr(doc, 'inline_shapes') else 0
     except Exception as exc:
         logger.warning("doc_parser: could not read '%s': %s", doc_path, exc)
-        return []
+        return [], 0
 
 
 class DocParser:
@@ -73,17 +75,24 @@ class DocParser:
 
     def initial_snapshot(self) -> None:
         """Capture baseline state when monitoring begins."""
-        self._snapshot = _parse_doc(self._doc_path)
+        self._snapshot, self._image_count = _parse_doc(self._doc_path)
         logger.info(
-            "Initial snapshot: %d paragraphs, %d total chars",
+            "Initial snapshot: %d paragraphs, %d total chars, %d images",
             len(self._snapshot),
             sum(p.char_count for p in self._snapshot),
+            self._image_count
         )
 
     def on_file_changed(self) -> None:
         """Called by FileWatcher after debounce. Triggers a diff computation."""
-        new_snap = _parse_doc(self._doc_path)
+        new_snap, new_images = _parse_doc(self._doc_path)
         diff = self._compute_diff(self._snapshot, new_snap)
+        
+        if new_images > self._image_count:
+            diff.new_images = new_images - self._image_count
+            diff.suspicious = True
+        self._image_count = new_images
+        
         self._snapshot = new_snap
         self._on_diff(diff)
 
@@ -94,6 +103,8 @@ class DocParser:
         old: list[ParagraphState],
         new: list[ParagraphState],
     ) -> DiffResult:
+        import re
+        url_pattern = re.compile(r'(https?://\S+)')
         result = DiffResult()
 
         old_hashes = {p.text_hash: p for p in old}
@@ -105,8 +116,9 @@ class DocParser:
                 result.new_chars += p.char_count
                 if p.char_count > LARGE_INSERT_THRESHOLD:
                     result.large_insertion = True
-                if p.char_count >= 80:
+                if p.char_count >= 10:
                     result.new_texts.append(p.raw_text)
+                    result.new_urls.extend(url_pattern.findall(p.raw_text))
 
         for p in old:
             if p.text_hash not in new_hashes:
@@ -123,8 +135,9 @@ class DocParser:
                 elif delta < 0:
                     result.deleted_chars += abs(delta)
                 result.modified_paragraphs += 1
-                if new[i].char_count >= 80:
+                if new[i].char_count >= 10:
                     result.new_texts.append(new[i].raw_text)
+                    result.new_urls.extend(url_pattern.findall(new[i].raw_text))
 
         result.suspicious = result.large_insertion
         logger.debug(

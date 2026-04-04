@@ -515,3 +515,149 @@ The <html> tag is the…'
 2026-04-03 22:54:56 | INFO     | core.session_manager | Session 4e4ccc01-7ccd-4877-8b21-8559b9c44ddb ended. Score=95.0
 2026-04-03 22:54:56 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
 2026-04-03 22:54:56 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_4e4ccc01_20260403_225456.html
+2026-04-04 21:05:02 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-04 21:05:02 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 21:12:48 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 21:12:48 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars
+2026-04-04 21:12:48 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 21:12:48 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 21:12:48 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 21:12:48 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 21:12:48 | INFO     | core.session_manager | Session 584bc3c4-2950-43de-b15a-5d27e3935553 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 21:17:09 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1014
+2026-04-04 21:17:09 | INFO     | analysis.behavioral_engine | Clipboard penalty: ['very large clipboard content (1014 chars)'] (-0 pts)
+2026-04-04 21:17:09 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 6 (flown April 4, 1968) was the t…'
+2026-04-04 21:17:12 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_6'
+2026-04-04 21:17:12 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_6' (-5 pts)
+2026-04-04 21:57:18 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=30
+2026-04-04 21:57:18 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'en.wikipedia.org/wiki/Apollo_6…'
+2026-04-04 21:58:03 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_11'
+2026-04-04 21:58:03 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_11' (-5 pts)
+2026-04-04 22:07:41 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-04 22:07:41 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:07:48 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:07:48 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-04 22:07:48 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-04 22:07:48 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-04 22:07:48 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_584bc3c4_20260404_220748.html
+2026-04-04 22:08:10 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:08:10 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 22:08:10 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 22:08:11 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 22:08:11 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 22:08:11 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 22:08:11 | INFO     | core.session_manager | Session d999261b-2d21-4b4b-8b66-34ebddfb62b1 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 22:08:34 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1014
+2026-04-04 22:08:34 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 6 (flown April 4, 1968) was the t…'
+2026-04-04 22:08:39 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_6'
+2026-04-04 22:08:39 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_6' (-5 pts)
+2026-04-04 22:09:10 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=513
+2026-04-04 22:09:10 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'NASA launches the lunar flyby mission Ar…'
+2026-04-04 22:09:14 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'www.nasa.gov/mission/artemis-ii/'
+2026-04-04 22:09:14 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'www.nasa.gov/mission/artemis-ii/' (-5 pts)
+2026-04-04 22:09:36 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1036
+2026-04-04 22:09:36 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Launch of Apollo 6
+Apollo 6 (flown Apri…'
+2026-04-04 22:09:39 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'www.britannica.com/story/timeline-of-the-apollo-space-missio'
+2026-04-04 22:09:39 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'www.britannica.com/story/timeline-of-the-apollo-space-missio' (-5 pts)
+2026-04-04 22:10:33 | INFO     | core.session_manager | Session paused.
+2026-04-04 22:10:34 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-04 22:10:34 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 3
+2026-04-04 22:10:34 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-04 22:10:34 | INFO     | core.session_manager | Session d999261b-2d21-4b4b-8b66-34ebddfb62b1 ended. Score=85.0
+2026-04-04 22:10:34 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-04 22:10:34 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_d999261b_20260404_221034.html
+2026-04-04 22:10:41 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:10:41 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 22:10:41 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 22:10:41 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 22:10:41 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 22:10:41 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 22:10:41 | INFO     | core.session_manager | Session 22feaa78-2ef3-492e-a590-46ceb336bd03 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 22:11:14 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1014
+2026-04-04 22:11:14 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 6 (flown April 4, 1968) was the t…'
+2026-04-04 22:11:17 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_6'
+2026-04-04 22:11:17 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_6' (-5 pts)
+2026-04-04 22:12:24 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-04 22:12:24 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 1
+2026-04-04 22:12:24 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-04 22:12:24 | INFO     | core.session_manager | Session 22feaa78-2ef3-492e-a590-46ceb336bd03 ended. Score=95.0
+2026-04-04 22:12:40 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-04 22:12:40 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:12:54 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:12:54 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 22:12:54 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 22:12:54 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 22:12:54 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 22:12:54 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 22:12:54 | INFO     | core.session_manager | Session 3ebe48c9-8ef6-4948-aaa4-5bb788926b79 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 22:13:46 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-04 22:13:46 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 0
+2026-04-04 22:13:46 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-04 22:13:46 | INFO     | core.session_manager | Session 3ebe48c9-8ef6-4948-aaa4-5bb788926b79 ended. Score=100.0
+2026-04-04 22:13:46 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-04 22:13:46 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_3ebe48c9_20260404_221346.html
+2026-04-04 22:25:48 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:25:48 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 22:25:48 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 22:25:48 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 22:25:48 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 22:25:48 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 22:25:48 | INFO     | core.session_manager | Session 1949c0c7-6412-417b-8355-083eae39fd93 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 22:26:14 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-04 22:26:14 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 0
+2026-04-04 22:26:14 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-04 22:26:14 | INFO     | core.session_manager | Session 1949c0c7-6412-417b-8355-083eae39fd93 ended. Score=100.0
+2026-04-04 22:26:14 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-04 22:26:14 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_1949c0c7_20260404_222614.html
+2026-04-04 22:35:35 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:45:49 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 65 total chars, 0 images
+2026-04-04 22:45:49 | DEBUG    | analysis.doc_parser | Diff: +94 chars, 1 new paras, 0 modified, suspicious=False
+2026-04-04 22:58:44 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-04 22:58:44 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:59:08 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 22:59:08 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 22:59:08 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 22:59:08 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 22:59:08 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 22:59:08 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 22:59:08 | INFO     | core.session_manager | Session 9cb78fbc-5531-45f7-901d-a9690f6a64d4 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 22:59:44 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1014
+2026-04-04 22:59:44 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 6 (flown April 4, 1968) was the t…'
+2026-04-04 22:59:51 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_6'
+2026-04-04 22:59:51 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_6' (-5 pts)
+2026-04-04 22:59:56 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-04 22:59:56 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 1
+2026-04-04 22:59:56 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-04 22:59:56 | INFO     | core.session_manager | Session 9cb78fbc-5531-45f7-901d-a9690f6a64d4 ended. Score=95.0
+2026-04-04 22:59:56 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-04 22:59:56 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_9cb78fbc_20260404_225956.html
+2026-04-04 23:01:40 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-04 23:01:40 | INFO     | analysis.doc_parser | Initial snapshot: 1 paragraphs, 0 total chars, 0 images
+2026-04-04 23:01:40 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-04 23:01:40 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-04 23:01:40 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx
+2026-04-04 23:01:40 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-04 23:01:40 | INFO     | core.session_manager | Session 960615eb-52bf-49d3-9861-277262175706 started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx'
+2026-04-04 23:02:18 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1014
+2026-04-04 23:02:18 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 6 (flown April 4, 1968) was the t…'
+2026-04-04 23:02:22 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_6'
+2026-04-04 23:02:22 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_6' (-5 pts)
+2026-04-04 23:02:53 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1193
+2026-04-04 23:02:53 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 17 (December 7–19, 1972) was the …'
+2026-04-04 23:03:00 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_17'
+2026-04-04 23:03:01 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_17' (-5 pts)
+2026-04-04 23:03:28 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=3567
+2026-04-04 23:03:28 | DEBUG    | analysis.external_checker | ExternalChecker probe: '2026-04-04 22:58:44 | INFO     | main | …'
+2026-04-04 23:03:32 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'www.urldecoder.org'
+2026-04-04 23:03:32 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'www.urldecoder.org' (-5 pts)
+2026-04-04 23:07:27 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=39
+2026-04-04 23:07:27 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'AIzaSyBk2PTGXoQYOuVda0ypnB1eGbjGu-_vfXY…'
+2026-04-04 23:07:30 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'www.tutorialspoint.com/http/http_url_encoding.htm'
+2026-04-04 23:07:30 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'www.tutorialspoint.com/http/http_url_encoding.htm' (-5 pts)
+2026-04-04 23:09:12 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=1607
+2026-04-04 23:09:12 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'You are an intelligent AI assistant inte…'
+2026-04-04 23:09:19 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'gemini.google.com'
+2026-04-04 23:09:19 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'gemini.google.com' (-5 pts)
+2026-04-04 23:10:05 | DEBUG    | analysis.doc_parser | Diff: +0 chars, 0 new paras, 0 modified, suspicious=False
+2026-04-04 23:10:05 | DEBUG    | analysis.behavioral_engine | DEBUG SYNC: Received 0 new_texts. Clipboard history size: 5

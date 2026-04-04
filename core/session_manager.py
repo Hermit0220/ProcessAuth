@@ -131,6 +131,9 @@ class SessionManager:
             "new_chars"      : diff.new_chars,
             "large_insertion": diff.large_insertion,
             "suspicious"     : diff.suspicious,
+            "new_images"     : getattr(diff, "new_images", 0),
+            "new_urls"       : getattr(diff, "new_urls", []),
+            "new_texts"      : getattr(diff, "new_texts", []),
         }
         self._event_queue.put(record)
         

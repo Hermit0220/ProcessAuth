@@ -99,7 +99,7 @@ class BehavioralEngine:
         # Clipboard timestamps for doc-diff correlation
         self._clipboard_times: list[float] = []
         # Track times of large clipboard events for burst detection
-        self._large_clip_times: list[float] = []
+        self._clipboard_history: list[dict] = []
         # Suspicious insertions for final report
         self.suspicious_insertions: list[dict] = []
         # Penalties that are immune to refund (e.g. pasted images)
@@ -146,81 +146,24 @@ class BehavioralEngine:
 
     def _handle_clipboard(self, record: dict, ts: float) -> None:
         """
-        Apply DIRECT score penalties based on clipboard content size.
-        Fires immediately on paste — does NOT wait for the .docx to be saved.
-        Stores snippet + content_type for report rendering.
+        Records the clipboard event in history but DOES NOT penalize it yet.
+        Penalties only apply if the clip makes its way into the document via `doc_diff`.
         """
-        self._clipboard_times.append(ts)
-        approx_len   = record.get("_approx_len", record.get("chars_added", 0))
-        content_type = record.get("_content_type", "text")
+        approx_len   = record.get("_approx_len", 0)
         snippet      = record.get("_snippet", "")
+        content_type = record.get("_content_type", "text")
         urls         = record.get("_urls", [])
 
-        # ── Image in clipboard ─────────────────────────────────────────────────
-        if content_type == "image":
-            self._stats.paste_events       += 1
-            self._stats.suspicious_events  += 1
-            self._stats.penalties          += PENALTY_IMAGE_PASTE
-            self._non_refundable_penalties += PENALTY_IMAGE_PASTE
-            reason = [f"image pasted from clipboard ({snippet})"]
-            self.suspicious_insertions.append({
-                "timestamp"    : ts,
-                "new_chars"    : 0,
-                "penalty"      : PENALTY_IMAGE_PASTE,
-                "reasons"      : reason,
-                "correlated"   : True,
-                "snippet"      : snippet,
-                "content_type" : "image",
-                "urls"         : [],
-            })
-            logger.info("Image clipboard penalty: %s", snippet)
-            return
-
-        # ── Text too small — no penalty ────────────────────────────────────────
-        if approx_len < CLIP_SMALL and content_type not in ("url", "url_in_text"):
-            return
-
-        self._stats.paste_events       += 1
-        self._stats.total_chars_pasted += approx_len
-
-        penalty = 0.0
-        reason  = []
-
-        # Base size penalty
-        if content_type in ("url", "url_in_text"):
-            penalty += PENALTY_URL_PASTE
-            reason.append(f"URL(s) pasted from clipboard ({len(urls)} link(s) detected)")
-        elif approx_len > CLIP_LARGE:
-            penalty += PENALTY_CLIP_XLG
-            reason.append(f"very large clipboard content ({approx_len} chars)")
-        elif approx_len > CLIP_MED:
-            penalty += PENALTY_CLIP_LRG
-            reason.append(f"large clipboard content ({approx_len} chars)")
-        else:
-            penalty += PENALTY_CLIP_MED
-            reason.append(f"medium clipboard content ({approx_len} chars)")
-
-        # Burst check
-        recent_large = [t for t in self._large_clip_times if ts - t <= CLIP_BURST_WINDOW]
-        if recent_large:
-            penalty += PENALTY_CLIP_BURST
-            reason.append("rapid paste burst")
-
-        self._large_clip_times.append(ts)
-        self._stats.suspicious_events += 1
-        self._stats.penalties         += penalty
-
-        self.suspicious_insertions.append({
-            "timestamp"    : ts,
-            "new_chars"    : approx_len,
-            "penalty"      : penalty,
-            "reasons"      : reason,
-            "correlated"   : True,
-            "snippet"      : snippet,
-            "content_type" : content_type,
-            "urls"         : urls,
+        # Maintain a rolling history of the last 20 clipboard items
+        self._clipboard_history.append({
+            "timestamp": ts,
+            "approx_len": approx_len,
+            "snippet": snippet,
+            "content_type": content_type,
+            "urls": urls
         })
-        logger.info("Clipboard penalty: %s (-%.0f pts)", reason, penalty)
+        if len(self._clipboard_history) > 20:
+            self._clipboard_history.pop(0)
 
     def _handle_diff(self, record: dict, ts: float) -> None:
         """
@@ -230,6 +173,11 @@ class BehavioralEngine:
         new_chars    = record.get("new_chars", 0)
         deleted_chars= record.get("deleted_chars", 0)
         large_insert = record.get("large_insertion", False)
+        
+        # New parser properties
+        new_images   = record.get("new_images", 0)
+        new_urls     = record.get("new_urls", [])
+        new_texts    = record.get("new_texts", [])
 
         penalty = 0.0
         reason  = []
@@ -254,7 +202,96 @@ class BehavioralEngine:
                     "urls"         : [],
                 })
 
-        # ── Insert Logic ─────────────────────────────────────────────────────────
+        # ── Image Detection ──────────────────────────────────────────────────────
+        if new_images > 0:
+            # Check if there is an image in clipboard history to correlate with
+            img_hist = [h for h in self._clipboard_history if h["content_type"] == "image"]
+            snip = img_hist[-1]["snippet"] if img_hist else "Unknown source"
+            self._stats.paste_events += new_images
+            self._stats.suspicious_events += new_images
+            self.suspicious_insertions.append({
+                "timestamp"    : ts,
+                "new_chars"    : 0,
+                "penalty"      : PENALTY_IMAGE_PASTE,
+                "reasons"      : [f"{new_images} image(s) inserted natively ({snip})"],
+                "correlated"   : True,
+                "snippet"      : snip,
+                "content_type" : "image",
+                "urls"         : [],
+            })
+            if img_hist:
+                self._clipboard_history.remove(img_hist[-1])
+
+        # ── URL Paste Detection ──────────────────────────────────────────────────
+        if new_urls:
+            url_hits = []
+            for url in new_urls:
+                # Correlate with clipboard
+                match = next((h for h in self._clipboard_history if h["content_type"] in ("url","url_in_text") and url in h["urls"]), None)
+                if match:
+                    url_hits.append(url)
+                    self._clipboard_history.remove(match)
+            if url_hits:
+                self._stats.paste_events += 1
+                self._stats.suspicious_events += 1
+                self.suspicious_insertions.append({
+                    "timestamp"    : ts,
+                    "new_chars"    : sum(len(u) for u in url_hits),
+                    "penalty"      : PENALTY_URL_PASTE,
+                    "reasons"      : [f"{len(url_hits)} URL(s) securely pasted into doc"],
+                    "correlated"   : True,
+                    "snippet"      : " ".join(url_hits),
+                    "content_type" : "url",
+                    "urls"         : url_hits,
+                })
+
+        # ── Text Match Detection ─────────────────────────────────────────────────
+        correlated_chars = 0
+        pasted_text_events = []
+        logger.debug(f"DEBUG SYNC: Received {len(new_texts)} new_texts. Clipboard history size: {len(self._clipboard_history)}")
+        for text in new_texts:
+            t_clean = text.strip()
+            logger.debug(f"DEBUG SYNC: Evaluating new text block length {len(t_clean)}: '{t_clean[:50]}...'")
+            
+            # Does this exactly match something in clipboard history?
+            match = None
+            for h in self._clipboard_history:
+                if h["content_type"] == "text":
+                    logger.debug(f"DEBUG SYNC: ... against clipboard snippet length {len(h['snippet'])}")
+                    if t_clean in h["snippet"]:
+                        match = h
+                        break
+            
+            if match:
+                logger.debug("DEBUG SYNC: Perfect Match Found!")
+                self._clipboard_history.remove(match)
+                cl = len(text)
+                correlated_chars += cl
+                if cl > CLIP_LARGE:
+                    pasted_text_events.append(("very large clipboard native insertion", cl, PENALTY_CLIP_XLG))
+                elif cl > CLIP_MED:
+                    pasted_text_events.append(("large clipboard native insertion", cl, PENALTY_CLIP_LRG))
+                elif cl > CLIP_SMALL:
+                    pasted_text_events.append(("medium clipboard native insertion", cl, PENALTY_CLIP_MED))
+                
+                # Report it for UI
+                if cl > CLIP_SMALL:
+                    self._stats.paste_events += 1
+                    self._stats.total_chars_pasted += cl
+                    self._stats.suspicious_events += 1
+                    self.suspicious_insertions.append({
+                        "timestamp"    : ts,
+                        "new_chars"    : cl,
+                        "penalty"      : pasted_text_events[-1][2] if pasted_text_events else 0,
+                        "reasons"      : [f"{pasted_text_events[-1][0]} ({cl} chars)"],
+                        "correlated"   : True,
+                        "snippet"      : text[:500],
+                        "content_type" : "text",
+                        "urls"         : [],
+                    })
+
+        # ── Uncorrelated Insert Logic (Typed very fast or unseen paste) ──────────
+        new_chars = max(0, new_chars - correlated_chars)  # Ignore chars we proved were pasted
         if new_chars > TIER3_THRESHOLD:
             penalty += PENALTY_TIER3
             reason.append(f"Tier-3 doc insert ({new_chars} chars)")
@@ -262,12 +299,7 @@ class BehavioralEngine:
             penalty += PENALTY_TIER2
             reason.append(f"Tier-2 doc insert ({new_chars} chars)")
 
-        correlated = any(
-            abs(ts - ct) <= CLIPBOARD_WINDOW for ct in self._clipboard_times
-        )
-        if correlated and large_insert:
-            reason.append("clipboard-correlated diff (already penalised)")
-        elif large_insert and not correlated:
+        if large_insert and new_chars > 150: # Only if remaining chars > 150
             penalty += PENALTY_BLOCK_INS
             reason.append("large doc insert without clipboard signal")
 
@@ -279,7 +311,7 @@ class BehavioralEngine:
                 "new_chars"    : new_chars,
                 "penalty"      : penalty,
                 "reasons"      : reason,
-                "correlated"   : correlated,
+                "correlated"   : False,
                 "snippet"      : "",
                 "content_type" : "text",
                 "urls"         : [],
