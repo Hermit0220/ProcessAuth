@@ -1,0 +1,32 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Secrets — NEVER commit these ──────────────────────────────────────────────
+.env
+
+# ── ProcessAuth runtime output ─────────────────────────────────────────────────
+logs/
+reports/*.html
+reports/*.json
+data/*.db
+exports/
+tmp_dump.json
+
+# ── OS / Editor ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Word temp files ────────────────────────────────────────────────────────────
+~$*.docx
+*.tmp
+~WRL*.tmp
