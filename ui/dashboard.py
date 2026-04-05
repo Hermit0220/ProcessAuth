@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFrame, QScrollArea,
     QSizePolicy, QProgressBar, QFileDialog,
-    QMessageBox, QComboBox,
+    QMessageBox, QComboBox, QTabWidget, QSizeGrip,
 )
 
 from analysis.behavioral_engine import SessionStats
@@ -132,6 +132,7 @@ class Dashboard(QMainWindow):
         super().__init__()
         self.setWindowTitle("ProcessAuth")
         self.setMinimumSize(980, 680)
+        self.resize(1200, 760)          # sensible default size
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
 
@@ -184,13 +185,39 @@ class Dashboard(QMainWindow):
 
         root.addWidget(self._build_title_bar())
 
-        body = QHBoxLayout()
+        # Tab container
+        self._tabs = QTabWidget()
+        self._tabs.setStyleSheet("""
+            QTabWidget::pane { border: none; background: transparent; }
+            QTabBar::tab {
+                background: rgba(255,255,255,0.03); color: #334155;
+                border: 1px solid rgba(255,255,255,0.06); border-bottom: none;
+                border-radius: 8px 8px 0 0; padding: 8px 22px;
+                font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-right: 4px;
+            }
+            QTabBar::tab:selected {
+                background: rgba(6,182,212,0.10); color: #06b6d4;
+                border-color: rgba(6,182,212,0.25);
+            }
+            QTabBar::tab:hover:!selected { background: rgba(255,255,255,0.06); color: #94a3b8; }
+        """)
+
+        # Tab 1 - Monitor
+        monitor_widget = QWidget()
+        monitor_widget.setStyleSheet("background: transparent;")
+        body = QHBoxLayout(monitor_widget)
         body.setContentsMargins(18, 18, 18, 18)
         body.setSpacing(14)
         body.addLayout(self._build_left_panel(), stretch=2)
         body.addLayout(self._build_right_panel(), stretch=3)
-        root.addLayout(body)
+        self._tabs.addTab(monitor_widget, "Monitor")
 
+        # Tab 2 - AI Humanizer
+        from ui.humanizer_panel import HumanizerPanel
+        self._humanizer_panel = HumanizerPanel()
+        self._tabs.addTab(self._humanizer_panel, "AI Humanizer")
+
+        root.addWidget(self._tabs)
         root.addWidget(self._build_status_bar())
 
     # ── title bar ─────────────────────────────────────────────────────────────
@@ -295,6 +322,7 @@ class Dashboard(QMainWindow):
 
         # ── Score arc card ─────────────────────────────────────────────────
         score_card = QFrame()
+        score_card.setMinimumHeight(270)
         score_card.setStyleSheet("""
             QFrame {
                 background: rgba(6,182,212,0.04);
@@ -303,8 +331,8 @@ class Dashboard(QMainWindow):
             }
         """)
         sc = QVBoxLayout(score_card)
-        sc.setContentsMargins(18, 18, 18, 16)
-        sc.setAlignment(Qt.AlignCenter)
+        sc.setContentsMargins(18, 16, 18, 16)
+        sc.setSpacing(0)
 
         slbl = QLabel("AUTHENTICITY SCORE")
         slbl.setAlignment(Qt.AlignCenter)
@@ -314,18 +342,20 @@ class Dashboard(QMainWindow):
         )
 
         self._score_arc = ScoreArc()
+        self._score_arc.setFixedSize(180, 180)
 
         self._score_label = QLabel("High Authenticity")
         self._score_label.setAlignment(Qt.AlignCenter)
         self._score_label.setStyleSheet(
-            "font-size:11px;color:#22c55e;font-weight:700;"
-            "letter-spacing:0.5px;margin-top:2px;"
+            "font-size:12px;color:#22c55e;font-weight:700;"
+            "letter-spacing:0.5px;"
             "background:transparent;border:none;"
         )
 
         sc.addWidget(slbl)
-        sc.addSpacing(6)
+        sc.addSpacing(8)
         sc.addWidget(self._score_arc, alignment=Qt.AlignCenter)
+        sc.addSpacing(8)
         sc.addWidget(self._score_label)
         col.addWidget(score_card)
 

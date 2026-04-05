@@ -8,6 +8,7 @@ ProcessAuth entry point.
 """
 import sys
 import os
+import time
 
 # ── ensure project root is on sys.path ───────────────────────────────────────
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -31,16 +32,31 @@ def check_crash_recovery(dashboard: Dashboard) -> None:
     """
     If any sessions exist in the DB with no end time, offer to generate
     a partial report from salvaged data.
+    Sessions whose document no longer exists are silently dismissed.
     """
     try:
         db.start()
         incomplete = db.get_incomplete_sessions()
+
+        # Auto-close sessions whose document file was deleted
+        valid = []
+        for s in incomplete:
+            doc_path = s.get("doc_path") or ""
+            if doc_path and not os.path.exists(doc_path):
+                logger.info(
+                    "Auto-dismissing stale session %s (doc deleted: %s)",
+                    s.get("session_id", "")[:8], doc_path
+                )
+                db.close_session(s["session_id"], time.time(), 0.0)
+            else:
+                valid.append(s)
+
         db.stop()
 
-        if not incomplete:
+        if not valid:
             return
 
-        latest = incomplete[0]
+        latest = valid[0]
         sid    = latest.get("session_id", "?")[:8]
         doc    = os.path.basename(latest.get("doc_path") or "Unknown")
 

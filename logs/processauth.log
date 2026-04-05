@@ -661,3 +661,342 @@ Apollo 6 (flown Apri…'
 2026-04-04 23:09:19 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'gemini.google.com' (-5 pts)
 2026-04-04 23:10:05 | DEBUG    | analysis.doc_parser | Diff: +0 chars, 0 new paras, 0 modified, suspicious=False
 2026-04-04 23:10:05 | DEBUG    | analysis.behavioral_engine | DEBUG SYNC: Received 0 new_texts. Clipboard history size: 5
+2026-04-05 18:21:13 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:21:13 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:23:19 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:23:19 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:23:25 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:23:25 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:25 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:25 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:25 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:25 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:25 | DEBUG    | analysis.behavioral_engine | DEBUG SYNC: Received 0 new_texts. Clipboard history size: 5
+2026-04-05 18:23:25 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-05 18:23:25 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_960615eb_20260405_182325.html
+2026-04-05 18:23:47 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:23:48 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:23:53 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:23:53 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:53 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:53 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:53 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:53 | INFO     | analysis.behavioral_engine | External hit: unknown — '' (-5 pts)
+2026-04-05 18:23:53 | DEBUG    | analysis.behavioral_engine | DEBUG SYNC: Received 0 new_texts. Clipboard history size: 5
+2026-04-05 18:23:53 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-05 18:23:54 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_960615eb_20260405_182354.html
+2026-04-05 18:24:49 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:24:50 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:29:05 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:29:05 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:29:43 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:29:43 | WARNING  | analysis.doc_parser | doc_parser: could not read 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/TEST 2 DOCUMENT.docx': Package not found at 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/TEST 2 DOCUMENT.docx'
+2026-04-05 18:29:43 | INFO     | analysis.doc_parser | Initial snapshot: 0 paragraphs, 0 total chars, 0 images
+2026-04-05 18:29:43 | INFO     | monitoring.keyboard | KeyboardMonitor started.
+2026-04-05 18:29:43 | INFO     | monitoring.clipboard | ClipboardMonitor started.
+2026-04-05 18:29:43 | INFO     | monitoring.file_watcher | FileWatcher started on: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/TEST 2 DOCUMENT.docx
+2026-04-05 18:29:43 | INFO     | analysis.external_checker | ExternalChecker started (DuckDuckGo + Wikipedia).
+2026-04-05 18:29:43 | INFO     | core.session_manager | Session 29ed7bde-abfb-4571-93b8-68e40cd6f32b started for 'C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/TEST 2 DOCUMENT.docx'
+2026-04-05 18:31:37 | DEBUG    | monitoring.clipboard | Clipboard changed — type=text len=669
+2026-04-05 18:31:37 | DEBUG    | analysis.external_checker | ExternalChecker probe: 'Apollo 17 (December 7–19, 1972) was the …'
+2026-04-05 18:31:40 | INFO     | analysis.external_checker | External source detected via duckduckgo: 'en.wikipedia.org/wiki/Apollo_17'
+2026-04-05 18:31:40 | INFO     | analysis.behavioral_engine | External hit: duckduckgo — 'en.wikipedia.org/wiki/Apollo_17' (-5 pts)
+2026-04-05 18:31:52 | INFO     | monitoring.keyboard | KeyboardMonitor stopped.
+2026-04-05 18:31:52 | INFO     | monitoring.clipboard | ClipboardMonitor stopped. Events: 1
+2026-04-05 18:31:52 | INFO     | monitoring.file_watcher | FileWatcher stopped.
+2026-04-05 18:31:52 | INFO     | core.session_manager | Session 29ed7bde-abfb-4571-93b8-68e40cd6f32b ended. Score=95.0
+2026-04-05 18:31:52 | ERROR    | database.db | get_events failed: Cannot operate on a closed database.
+2026-04-05 18:31:52 | INFO     | reports.generator | HTML report saved: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\exports\report_29ed7bde_20260405_183152.html
+2026-04-05 18:33:58 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:33:58 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:41:20 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:41:20 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:45:22 | WARNING  | ai.gemini_client | Gemini 429 — waiting 65 s before retry
+2026-04-05 18:46:37 | ERROR    | ai.gemini_client | Intent classification failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 17.763544709s.
+2026-04-05 18:46:52 | DEBUG    | ai.humanizer_engine | Wikipedia failed for 'Apollo 17 (December 7–19, 1972) was the eleventh and final crewed mission of NASA's Apollo program, the sixth and most recent time humans have set foot on the Moon. Commander Gene Cernan and Lunar Module Pilot Harrison Schmitt walked on the Moon, while Command Module Pilot Ronald Evans orbited above. Schmitt was the only professional geologist to land on the Moon; he was selected in place of Joe Engle, as NASA had been under pressure to send a scientist to the Moon. The mission's heavy emphasis on science meant the inclusion of a number of new experiments, including a biological experiment containing five mice that was carried in the command and service module.': HTTPSConnectionPool(host='en.wikipedia.org', port=443): Read timed out. (read timeout=6)
+2026-04-05 18:47:21 | DEBUG    | ai.humanizer_engine | DuckDuckGo failed for 'Apollo 17 (December 7–19, 1972) was the eleventh and final crewed mission of NASA's Apollo program, the sixth and most recent time humans have set foot on the Moon. Commander Gene Cernan and Lunar Module Pilot Harrison Schmitt walked on the Moon, while Command Module Pilot Ronald Evans orbited above. Schmitt was the only professional geologist to land on the Moon; he was selected in place of Joe Engle, as NASA had been under pressure to send a scientist to the Moon. The mission's heavy emphasis on science meant the inclusion of a number of new experiments, including a biological experiment containing five mice that was carried in the command and service module.': Expecting value: line 1 column 1 (char 0)
+2026-04-05 18:47:23 | WARNING  | ai.gemini_client | Gemini 429 — waiting 65 s before retry
+2026-04-05 18:48:37 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 59, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 116, in process
+    return gemini.ask(text, context=context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 157, in ask
+    return _call(_ASK_PROMPT.format(prompt=prompt))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 68, in _call
+    raise RuntimeError(f"{resp.status_code} {message}")
+RuntimeError: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 18.672859164s.
+2026-04-05 18:50:43 | WARNING  | ai.gemini_client | Gemini 429 — waiting 65 s before retry
+2026-04-05 18:51:22 | ERROR    | ai.ninja_client | Ninja weather error for 'berlin': 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/weather?city=berlin
+2026-04-05 18:51:50 | ERROR    | ai.gemini_client | Intent classification failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 5.706383039s.
+2026-04-05 18:51:52 | WARNING  | ai.gemini_client | Gemini 429 — waiting 65 s before retry
+2026-04-05 18:53:21 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 18:53:21 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 18:53:21 | INFO     | main | Auto-dismissing stale session 960615eb (doc deleted: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx)
+2026-04-05 18:53:21 | WARNING  | main | Crash recovery check failed: name 'time' is not defined
+2026-04-05 18:54:11 | ERROR    | ai.ninja_client | Ninja quotes error: NINJA_API_KEY is missing. Add it to your .env file.
+2026-04-05 19:08:23 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:08:23 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:08:23 | INFO     | main | Auto-dismissing stale session 960615eb (doc deleted: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx)
+2026-04-05 19:08:23 | WARNING  | main | Crash recovery check failed: name 'time' is not defined
+2026-04-05 19:09:00 | ERROR    | ai.ninja_client | Ninja weather error for 'Berlin': NINJA_API_KEY is missing. Add it to your .env file.
+2026-04-05 19:10:59 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:10:59 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:10:59 | INFO     | main | Auto-dismissing stale session 960615eb (doc deleted: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx)
+2026-04-05 19:10:59 | WARNING  | main | Crash recovery check failed: name 'time' is not defined
+2026-04-05 19:11:26 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 63, in _call
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Rate limit reached (free tier: 15 requests/min). Please wait ~60 seconds and try again.
+2026-04-05 19:16:05 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:16:05 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:16:05 | INFO     | main | Auto-dismissing stale session 960615eb (doc deleted: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx)
+2026-04-05 19:16:05 | INFO     | main | Auto-dismissing stale session 584bc3c4 (doc deleted: C:/Users/ThinkPad/Desktop/Projects/ProcessAuth/Testing.docx)
+2026-04-05 19:16:40 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 113, in process
+    return gemini.humanize(text)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 155, in humanize
+    return _call(_HUMANIZE_PROMPT.format(text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 70, in _call
+    raise RuntimeError(f"Gemini error {resp.status_code}: {message}")
+RuntimeError: Gemini error 404: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2026-04-05 19:17:06 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 123, in process
+    return gemini.ask(text, context=context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 169, in ask
+    return _call(_ASK_PROMPT.format(context_block=block, prompt=prompt))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 70, in _call
+    raise RuntimeError(f"Gemini error {resp.status_code}: {message}")
+RuntimeError: Gemini error 404: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2026-04-05 19:43:41 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:43:41 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:43:56 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 19:50:50 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:50:50 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:51:06 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 63, in _call
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Rate limit reached (free tier: 15 requests/min). Please wait ~60 seconds and try again.
+2026-04-05 19:53:04 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 63, in _call
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Rate limit reached (free tier: 15 requests/min). Please wait ~60 seconds and try again.
+2026-04-05 19:55:42 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:55:42 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:56:02 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 19:56:32 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 19:56:32 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 19:56:48 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:13 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 20:09:13 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 20:09:36 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:56 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:57 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:58 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:58 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:58 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:09:58 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:10:16 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:12:44 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 134, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 31, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:23:54 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 20:23:54 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 20:25:12 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 135, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\gemini_client.py", line 32, in _call
+    raise RuntimeError("GEMINI_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
+2026-04-05 20:49:00 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 20:49:00 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 20:52:06 | ERROR    | ai.ninja_client | Ninja weather error for 'colombo': 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/weather?city=colombo
+2026-04-05 20:52:18 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1

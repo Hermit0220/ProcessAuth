@@ -51,28 +51,37 @@ class _Worker(QThread):
     def run(self) -> None:
         try:
             from ai import humanizer_engine as engine
-            from ai import gemini_client    as gemini
+            from ai.groq_client import detect_mode_local
             mode = self._mode
+
+            # Show badge instantly using local heuristic (zero API cost)
             if mode == "Auto":
-                mode = gemini.classify_intent(self._text)
-                self.mode_detected.emit(mode)
+                local_mode = detect_mode_local(self._text)
+                self.mode_detected.emit(local_mode)
+
+            # Single Gemini call inside engine.process()
             result = engine.process(self._text, mode=mode, city=self._city)
             self.result_ready.emit(result)
+
         except Exception as exc:
             logger.exception("Humanizer worker error")
             msg = str(exc)
-            if "429" in msg or "RESOURCE_EXHAUSTED" in msg or "Rate limit" in msg:
+            if "Rate limit" in msg or "429" in msg or "RESOURCE_EXHAUSTED" in msg:
                 self.error_occurred.emit(
-                    "The AI is busy right now (rate limit). "
-                    "Please wait a moment and try again."
+                    "Rate limit reached (free tier: 15 req/min). "
+                    "Wait ~60 seconds and try again."
                 )
-            elif "401" in msg or "API_KEY" in msg:
+            elif "401" in msg or "403" in msg or "API key" in msg.lower():
                 self.error_occurred.emit(
-                    "API key error — please check your .env file."
+                    "API key rejected — check your .env GEMINI_API_KEY."
                 )
-            elif "timeout" in msg.lower() or "connection" in msg.lower():
+            elif "internet" in msg.lower() or "connection" in msg.lower():
                 self.error_occurred.emit(
-                    "Connection timed out. Check your internet and try again."
+                    "Could not reach the AI service. Check your internet connection."
+                )
+            elif "too long" in msg.lower() or "timeout" in msg.lower():
+                self.error_occurred.emit(
+                    "Request timed out. Try again or shorten your input."
                 )
             else:
                 self.error_occurred.emit(msg)

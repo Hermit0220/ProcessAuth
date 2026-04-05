@@ -24,10 +24,11 @@ _TIMEOUT = 10
 
 
 def _headers() -> dict:
-    from ai.config import NINJA_API_KEY
-    if not NINJA_API_KEY:
+    from ai.config import get_ninja_key
+    ninja_key = get_ninja_key()
+    if not ninja_key:
         raise RuntimeError("NINJA_API_KEY is missing. Add it to your .env file.")
-    return {"X-Api-Key": NINJA_API_KEY}
+    return {"X-Api-Key": ninja_key}
 
 
 def _get(endpoint: str, params: dict | None = None) -> list | dict:
