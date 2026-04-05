@@ -92,8 +92,7 @@ def detect_mode_local(text: str) -> str:
 _AUTO_PROMPT = textwrap.dedent("""\
     You are a smart AI assistant. Analyze the user's input and respond appropriately:
 
-    - If the user wants text IMPROVED, REWRITTEN, or HUMANIZED → rewrite it naturally
-      and conversationally. Preserve all original meaning. Sound like a real person wrote it.
+    - If the user wants text IMPROVED, REWRITTEN, or HUMANIZED → Rewrite it to sound exactly like it was written by a real human. Use a conversational, engaging, and professional tone. Vary sentence structure (mix short, punchy sentences with longer ones). Remove typical AI words ('In conclusion', 'delve', 'testament', 'crucial', 'tapestry'). Incorporate idiomatic expressions naturally. Sound empathetic and authentic, not automated. If appropriate to the text, rewrite from a first-person perspective to truly pass AI detectors.
     - If the user asks a QUESTION or wants an EXPLANATION → answer clearly and naturally,
       like a knowledgeable friend, not a textbook.
     - If the user wants a SUMMARY of long text → condense into clear key points.
@@ -101,7 +100,7 @@ _AUTO_PROMPT = textwrap.dedent("""\
 
     Rules:
     - Reply with ONLY the final result — no labels, no 'I will now...', no meta-commentary.
-    - Use a natural, human tone. Vary sentence length. Use contractions where appropriate.
+    - Use a natural, human tone.
     - Never mention that you classified or detected anything.
 
     {context_block}User input:
@@ -118,12 +117,14 @@ def smart_respond(text: str, context: str = "") -> str:
 # ── Manual mode functions ───────────────────────────────────────────────────
 
 _HUMANIZE_PROMPT = textwrap.dedent("""\
-    You are a professional ghostwriter. Rewrite the following text so it sounds
-    natural, warm, and human. Rules:
-    - Preserve every original idea and fact.
-    - Vary sentence length and structure.
-    - Use contractions where natural (it's, don't, I've, etc.).
-    - Remove robotic phrasing.
+    Rewrite the following text to make it sound exactly like it was written by a human. 
+    Use a conversational, engaging, and professional tone. Modify the syntax to truly pass AI detectors, adopting a first-person perspective or inserting subtle personal anecdotes if it fits the context naturally.
+    
+    Rules:
+    - Vary sentence structure (mix short, punchy sentences with longer, complex ones).
+    - Avoid overusing adjectives and remove typical AI phrases like 'In conclusion,' 'delve,' 'testament,' 'tapestry,' or 'crucial.'
+    - Incorporate idiomatic expressions naturally, and prioritize clarity over complex vocabulary.
+    - The goal is to sound empathetic and authentic, not automated.
     - Return ONLY the rewritten text — no explanation.
 
     Original:
