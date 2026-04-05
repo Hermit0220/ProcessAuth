@@ -1002,3 +1002,91 @@ RuntimeError: GEMINI_API_KEY is missing. Add it to your .env file.
 2026-04-05 20:52:18 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
 2026-04-05 21:22:42 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
 2026-04-05 21:36:48 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
+2026-04-05 21:44:05 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 21:44:05 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-05 21:44:40 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 113, in process
+    return gemini.humanize(text)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 136, in humanize
+    return _call(_HUMANIZE_PROMPT.format(text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:07 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:08 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:08 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:09 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:09 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:50:09 | ERROR    | ui.humanizer_panel | Humanizer worker error
+Traceback (most recent call last):
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ui\humanizer_panel.py", line 63, in run
+    result = engine.process(self._text, mode=mode, city=self._city)
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\humanizer_engine.py", line 109, in process
+    return gemini.smart_respond(text, context=context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 115, in smart_respond
+    return _call(_AUTO_PROMPT.format(context_block=block, text=text))
+  File "C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\ai\groq_client.py", line 22, in _call
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+RuntimeError: GROQ_API_KEY is missing. Add it to your .env file.
+2026-04-05 21:57:16 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-05 21:57:16 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
