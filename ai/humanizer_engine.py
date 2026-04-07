@@ -98,21 +98,34 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
     if not text:
         return "Please type something first."
 
-    # ── Ninja engine: data modes use Ninja, rewrite modes use local Ollama ─────
+    # ── 🥷 Ninja engine: uses only Ninja APIs & Wikipedia — never Ollama ─────────
     if llm_model and "ninja" in llm_model.lower():
-        # Facts mode → pull a real Ninja fact
+
+        # HumanRewrite / Summarize → Ninja has no text rewriting API
+        if mode in ("HumanRewrite", "Summarize"):
+            action = "rewrite" if mode == "HumanRewrite" else "summarize"
+            return (
+                f"🥷  Ninja doesn't support text {action}ing — it's a data engine.\n\n"
+                f"To {action} this text, select a local model from the Model dropdown:\n"
+                f"  •  ✦ Custom Trained · processauth-llama  (recommended)\n"
+                f"  •  llama3.2:latest\n"
+                f"  •  gemma3:1b\n\n"
+                f"Make sure Ollama is running first (llama icon in your system tray)."
+            )
+
+        # Facts mode → Ninja APIs (weather, definitions, general facts via Wikipedia)
         if mode == "Facts":
             if re.search(
                 r"\b(weather|temperature|temp|rain|humidity|forecast|hot|cold|degrees)\b",
                 text, re.IGNORECASE
             ) and city.strip():
                 return ninja.format_weather(ninja.get_weather(city.strip()))
-            m = re.match(
+            m_def = re.match(
                 r"^\s*(define|meaning of|what does|what is)\s+\"?(\w+)\"?\s*\??$",
                 text, re.IGNORECASE
             )
-            if m:
-                word = m.group(2)
+            if m_def:
+                word = m_def.group(2)
                 defs = ninja.get_word_definition(word)
                 lines = [f"\U0001f4d6  {word.title()}"]
                 for d in defs[:3]:
@@ -123,28 +136,37 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
                     if ex:
                         lines.append(f'  e.g. "{ex}"')
                 return "\n".join(lines)
-            # General fact: enrich with Wikipedia then answer via local model
+            # General: try Wikipedia, then DuckDuckGo
             topic   = _extract_topic(text)
             context = _gather_context(topic)
-            return gemini.facts(text, context=context, model=None)
+            if context:
+                return f"\U0001f4da  {topic.title()}\n\n{context}"
+            return f"🥷  No information found for '{topic}'. Try a more specific query."
 
-        # HumanRewrite / Summarize / Auto → Ninja can't rewrite, use local Ollama
-        if mode in ("HumanRewrite", "Summarize"):
-            return gemini.humanize(text, model=None) if mode == "HumanRewrite" \
-                   else gemini.summarize(text, model=None)
-
-        # Ask mode → Wikipedia context + local Ollama answer
+        # Ask mode → Wikipedia + DuckDuckGo context only, formatted answer
         if mode == "Ask":
             topic   = _extract_topic(text)
             context = _gather_context(topic) if len(topic) > 4 else ""
-            return gemini.ask(text, context=context, model=None)
+            if context:
+                return f"\U0001f4ac  {topic.title()}\n\n{context}"
+            return f"🥷  Couldn't find information on '{topic}' via Wikipedia/DuckDuckGo."
 
-        # Auto → detect and route
+        # Auto → detect intent and re-route within Ninja
         local_mode = gemini.detect_mode_local(text)
-        context = ""
-        if local_mode in ("Ask", "Facts"):
-            context = _gather_context(_extract_topic(text))
-        return gemini.smart_respond(text, context=context, model=None)
+        if local_mode == "HumanRewrite":
+            return (
+                "🥷  Auto detected: text rewrite requested.\n\n"
+                "Ninja can't rewrite text — select a local Ollama model for this."
+            )
+        if local_mode == "Facts":
+            topic   = _extract_topic(text)
+            context = _gather_context(topic)
+            return f"\U0001f4da  {topic.title()}\n\n{context}" if context \
+                   else f"🥷  No data found for '{topic}'."
+        topic   = _extract_topic(text)
+        context = _gather_context(topic)
+        return f"\U0001f4ac  {topic.title()}\n\n{context}" if context \
+               else f"🥷  No results found for '{topic}'."
 
     # ── Auto: single smart call (no pre-classification) ──────────────────────────
     if mode == "Auto":

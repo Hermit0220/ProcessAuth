@@ -1361,3 +1361,15 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11434
 2026-04-07 11:18:12 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
 2026-04-07 11:22:04 | INFO     | main | Consent accepted. Launching dashboard.
 2026-04-07 11:22:04 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 11:33:20 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:33:20 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 11:37:33 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:37:33 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 15:14:59 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 15:14:59 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 15:15:07 | WARNING  | ai.ollama_client | Could not fetch Ollama models: HTTPConnectionPool(host='127.0.0.1', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=11434): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-04-07 15:46:55 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 15:46:56 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 15:47:00 | WARNING  | ai.ollama_client | Could not fetch Ollama models: HTTPConnectionPool(host='127.0.0.1', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=11434): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-04-07 15:51:39 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 15:51:40 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db

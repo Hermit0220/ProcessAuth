@@ -158,32 +158,26 @@ class HumanizerPanel(QWidget):
         self._populate_models()
         
     def _populate_models(self):
-        models = ollama_client.fetch_local_models()
-        if not models:
-            self._model_combo.addItem("llama3.2:latest")
-        else:
-            for m in models:
-                self._model_combo.addItem(m)
-        self._populate_models()
-        
-    def _populate_models(self):
         self._model_combo.clear()
-        
-        # Preferred custom-trained models first
+
         preferred = ["processauth-llama", "processauth-gemma"]
-        
-        models = ollama_client.fetch_local_models()
+        models    = ollama_client.fetch_local_models()
+        ollama_up = len(models) > 0
+
         # Put custom trained models at the top
         for name in preferred:
             if name in models:
                 self._model_combo.addItem(f"✦ Custom Trained · {name}")
                 models.remove(name)
+
         # Remaining Ollama models
         for m in models:
             self._model_combo.addItem(m)
-        # Fallback if Ollama is empty
-        if self._model_combo.count() == 0:
-            self._model_combo.addItem("llama3.2:latest")
+
+        # Offline notice when Ollama is not running
+        if not ollama_up:
+            self._model_combo.addItem("⚠  Ollama offline — start it first")
+
         # Cloud option always at the end
         self._model_combo.addItem("🥷 Ninja")
 

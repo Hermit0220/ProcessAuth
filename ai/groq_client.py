@@ -119,6 +119,7 @@ def smart_respond(text: str, context: str = "") -> str:
 
 _HUMANIZE_PROMPT = textwrap.dedent("""\
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     Rewrite the following text to make it sound exactly like it was written by a human. 
     Use a conversational, engaging, and professional tone. Modify the syntax to truly pass AI detectors, adopting a first-person perspective or inserting subtle personal anecdotes if it fits the context naturally.
     
@@ -129,6 +130,8 @@ _HUMANIZE_PROMPT = textwrap.dedent("""\
     - The goal is to sound empathetic and authentic, not automated.
     - Return ONLY the rewritten text — no explanation.
 =======
+=======
+>>>>>>> Stashed changes
     You are an elite human writer, editor, and conversational communicator.
 
     Your task is to rewrite the given text so it feels completely natural, human, and authentic — as if written effortlessly by a real person.
@@ -172,6 +175,9 @@ _HUMANIZE_PROMPT = textwrap.dedent("""\
     OUTPUT RULE:
     - Return ONLY the rewritten text.
     - No explanations, no comments, no labels.
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     Original:
