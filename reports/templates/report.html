@@ -488,6 +488,7 @@ const EVENTS = [
     penalty: {{ ev.penalty }},
     new_chars: {{ ev.new_chars }},
     time_str: {{ ev.time_str | tojson }},
+    source_url: {{ ev.source_url | default("") | tojson }},
   },
   {% endfor %}
 ];
@@ -562,6 +563,9 @@ function buildContentBlock(ev) {
       ).join('');
       inner += `<div class="cb-label" style="margin-top:.75rem">Detected URL(s)</div>
         <ul style="list-style:none">${links}</ul>`;
+    } else if (ev.source_url) {
+      inner += `<div class="cb-label" style="margin-top:.75rem">Original Web Source</div>
+        <ul style="list-style:none"><li><a class="cb-url" href="${escHtml(ev.source_url)}" target="_blank" rel="noopener">🔗 ${escHtml(ev.source_url)}</a></li></ul>`;
     }
     html = inner ? `<div class="modal-content-block">${inner}</div>` : '';
   } else if (ev.snippet) {

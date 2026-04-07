@@ -120,3 +120,34 @@ def format_weather(w: dict) -> str:
         f"Wind Speed   :  {w.get('wind_speed', '?')} m/s\n"
         f"Cloud Cover  :  {w.get('cloud_pct', '?')}%"
     )
+
+
+def humanize(text: str) -> str:
+    """Paraphrase / humanize text using the API Ninjas paraphrase endpoint."""
+    try:
+        url  = f"{_BASE}/paraphrase"
+        resp = requests.post(
+            url,
+            headers=_headers(),
+            json={"text": text},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        # API Ninjas returns {"result": "..."} or {"paraphrase": "..."}
+        result = data.get("result") or data.get("paraphrase") or data.get("text", "")
+        if result:
+            return result.strip()
+        return f"⚠  Ninja returned an unexpected response: {data}"
+    except requests.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else "?"
+        logger.error("Ninja paraphrase HTTP %s: %s", status, exc)
+        if status == 404:
+            return (
+                "⚠  API Ninjas paraphrase endpoint is not available on your plan.\n"
+                "Switch to a local model (llama3.2 / gemma3) in the Model dropdown."
+            )
+        return f"⚠  Ninja paraphrase error ({status}): {exc}"
+    except Exception as exc:
+        logger.error("Ninja humanize error: %s", exc)
+        return f"⚠  Could not reach API Ninjas: {exc}"

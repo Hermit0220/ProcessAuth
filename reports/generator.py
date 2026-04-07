@@ -102,6 +102,7 @@ def generate_report(
             "snippet"     : ev.get("snippet", ""),
             "content_type": ev.get("content_type", "text"),
             "urls"        : ev.get("urls", []),
+            "source_url"  : ev.get("source_url", ""),
         }
         for ev in suspicious_insertions
     ]

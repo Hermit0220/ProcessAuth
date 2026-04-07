@@ -85,20 +85,68 @@ def _needs_context(mode: str, text: str) -> bool:
 
 # ── Main entry point ───────────────────────────────────────────────────────────
 
-def process(user_input: str, mode: str = "Auto", city: str = "") -> str:
+def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: str = "") -> str:
     """
     Route user input to the correct pipeline.
     Auto mode = 1 Gemini call.
     Manual modes = 1 Gemini call each.
     """
-    from ai import groq_client as gemini
+    from ai import ollama_client as gemini
     from ai import ninja_client  as ninja
 
     text = user_input.strip()
     if not text:
         return "Please type something first."
 
-    # ── Auto: single smart call (no pre-classification) ───────────────────────
+    # ── Ninja engine: data modes use Ninja, rewrite modes use local Ollama ─────
+    if llm_model and "ninja" in llm_model.lower():
+        # Facts mode → pull a real Ninja fact
+        if mode == "Facts":
+            if re.search(
+                r"\b(weather|temperature|temp|rain|humidity|forecast|hot|cold|degrees)\b",
+                text, re.IGNORECASE
+            ) and city.strip():
+                return ninja.format_weather(ninja.get_weather(city.strip()))
+            m = re.match(
+                r"^\s*(define|meaning of|what does|what is)\s+\"?(\w+)\"?\s*\??$",
+                text, re.IGNORECASE
+            )
+            if m:
+                word = m.group(2)
+                defs = ninja.get_word_definition(word)
+                lines = [f"\U0001f4d6  {word.title()}"]
+                for d in defs[:3]:
+                    pos = d.get("part_of_speech", "")
+                    dfn = d.get("definition", "")
+                    ex  = d.get("example", "")
+                    lines.append(f"\n({pos})  {dfn}" if pos else f"\n{dfn}")
+                    if ex:
+                        lines.append(f'  e.g. "{ex}"')
+                return "\n".join(lines)
+            # General fact: enrich with Wikipedia then answer via local model
+            topic   = _extract_topic(text)
+            context = _gather_context(topic)
+            return gemini.facts(text, context=context, model=None)
+
+        # HumanRewrite / Summarize / Auto → Ninja can't rewrite, use local Ollama
+        if mode in ("HumanRewrite", "Summarize"):
+            return gemini.humanize(text, model=None) if mode == "HumanRewrite" \
+                   else gemini.summarize(text, model=None)
+
+        # Ask mode → Wikipedia context + local Ollama answer
+        if mode == "Ask":
+            topic   = _extract_topic(text)
+            context = _gather_context(topic) if len(topic) > 4 else ""
+            return gemini.ask(text, context=context, model=None)
+
+        # Auto → detect and route
+        local_mode = gemini.detect_mode_local(text)
+        context = ""
+        if local_mode in ("Ask", "Facts"):
+            context = _gather_context(_extract_topic(text))
+        return gemini.smart_respond(text, context=context, model=None)
+
+    # ── Auto: single smart call (no pre-classification) ──────────────────────────
     if mode == "Auto":
         # Gather context quickly for knowledge topics
         local_mode = gemini.detect_mode_local(text)
@@ -106,21 +154,21 @@ def process(user_input: str, mode: str = "Auto", city: str = "") -> str:
         if local_mode in ("Ask", "Facts"):
             topic   = _extract_topic(text)
             context = _gather_context(topic)
-        return gemini.smart_respond(text, context=context)
+        return gemini.smart_respond(text, context=context, model=llm_model)
 
     # ── HumanRewrite ──────────────────────────────────────────────────────────
     if mode == "HumanRewrite":
-        return gemini.humanize(text)
+        return gemini.humanize(text, model=llm_model)
 
     # ── Summarize ─────────────────────────────────────────────────────────────
     if mode == "Summarize":
-        return gemini.summarize(text)
+        return gemini.summarize(text, model=llm_model)
 
     # ── Ask ───────────────────────────────────────────────────────────────────
     if mode == "Ask":
         topic   = _extract_topic(text)
         context = _gather_context(topic) if len(topic) > 4 else ""
-        return gemini.ask(text, context=context)
+        return gemini.ask(text, context=context, model=llm_model)
 
     # ── Facts ─────────────────────────────────────────────────────────────────
     if mode == "Facts":
@@ -152,7 +200,7 @@ def process(user_input: str, mode: str = "Auto", city: str = "") -> str:
         # General fact with context
         topic   = _extract_topic(text)
         context = _gather_context(topic)
-        return gemini.facts(text, context=context)
+        return gemini.facts(text, context=context, model=llm_model)
 
     # Fallback
-    return gemini.smart_respond(text)
+    return gemini.smart_respond(text, model=llm_model)

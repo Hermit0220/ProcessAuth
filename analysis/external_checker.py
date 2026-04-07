@@ -108,6 +108,8 @@ class ExternalChecker:
 
             hit = self._query_duckduckgo(probe, snippet)
             if not hit:
+                hit = self._query_internet_archive(probe, snippet)
+            if not hit:
                 hit = self._query_wikipedia(probe, snippet)
 
             self._last_req = time.monotonic()
@@ -233,6 +235,30 @@ class ExternalChecker:
             else:
                 out.append(chunk)
         return ''.join(out)
+
+    def _query_internet_archive(self, probe: str, snippet: str) -> dict | None:
+        """
+        Internet Archive Scraping API — free.
+        Searches metadata across the archive for exact text snippets.
+        """
+        try:
+            q = urllib.parse.quote_plus(f'"{probe}"')
+            url = f"https://archive.org/services/search/v1/scrape?fields=title,identifier,description&q={q}"
+            req = urllib.request.Request(url, headers={"User-Agent": "ProcessAuth/1.0"})
+            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
+                data = json.loads(resp.read().decode("utf-8", errors="replace"))
+                
+            items = data.get("items", [])
+            if items:
+                ident = items[0].get("identifier", "")
+                if ident:
+                    archive_url = f"https://archive.org/details/{ident}"
+                    # We don't download the massive PDF/book, we just fall back to standard text
+                    return {"source": "internet_archive", "title": archive_url, "highlighted_html": snippet}
+        except Exception as exc:
+            logger.debug("Internet Archive query failed: %s", exc)
+
+        return None
 
     def _query_wikipedia(self, probe: str, snippet: str) -> dict | None:
         """

@@ -114,9 +114,11 @@ def smart_respond(text: str, context: str = "") -> str:
         block = f"Relevant background information:\n---\n{context[:2000]}\n---\n\n"
     return _call(_AUTO_PROMPT.format(context_block=block, text=text))
 
+
 # ── Manual mode functions ───────────────────────────────────────────────────
 
 _HUMANIZE_PROMPT = textwrap.dedent("""\
+<<<<<<< Updated upstream
     Rewrite the following text to make it sound exactly like it was written by a human. 
     Use a conversational, engaging, and professional tone. Modify the syntax to truly pass AI detectors, adopting a first-person perspective or inserting subtle personal anecdotes if it fits the context naturally.
     
@@ -126,6 +128,51 @@ _HUMANIZE_PROMPT = textwrap.dedent("""\
     - Incorporate idiomatic expressions naturally, and prioritize clarity over complex vocabulary.
     - The goal is to sound empathetic and authentic, not automated.
     - Return ONLY the rewritten text — no explanation.
+=======
+    You are an elite human writer, editor, and conversational communicator.
+
+    Your task is to rewrite the given text so it feels completely natural, human, and authentic — as if written effortlessly by a real person.
+
+    CORE OBJECTIVE:
+    Preserve the exact meaning, facts, and intent while making the writing sound fluid, engaging, and realistic.
+
+    STYLE & TONE ADAPTATION:
+    - Detect the intended tone (casual, professional, friendly, persuasive, academic, etc.) and match it.
+    - If unclear, default to a natural, conversational tone.
+    - Avoid sounding robotic, scripted, or overly polished.
+
+    HUMANIZATION TECHNIQUES:
+    - Vary sentence length (mix short, medium, and long sentences).
+    - Use contractions naturally (it's, don't, you're, I've).
+    - Add subtle conversational flow (e.g., transitions like "honestly", "so", "well", "in that case" where appropriate).
+    - Break rigid structures into more fluid phrasing.
+    - Avoid repetitive patterns and predictable phrasing.
+    - Slightly soften or rephrase overly formal or stiff wording.
+
+    AUTHENTICITY RULES:
+    - Do NOT add new information.
+    - Do NOT remove important details.
+    - Do NOT exaggerate or fabricate.
+    - Do NOT turn it into marketing copy unless it already is.
+    - Keep it believable and grounded.
+
+    ANTI-AI DETECTION GUIDELINES:
+    - Avoid overly perfect grammar everywhere — allow natural variation.
+    - Avoid generic filler phrases.
+    - Avoid symmetrical or formulaic sentence structures.
+    - Ensure the text does not feel templated or machine-generated.
+
+    CONTEXT AWARENESS:
+    - If the text implies a situation (email, message, essay, caption, etc.), adapt accordingly.
+    - Maintain the writer's implied personality and intent.
+
+    MINIMAL EDIT RULE:
+    - If the input is already natural, improve it subtly instead of over-rewriting.
+
+    OUTPUT RULE:
+    - Return ONLY the rewritten text.
+    - No explanations, no comments, no labels.
+>>>>>>> Stashed changes
 
     Original:
     \"\"\"{text}\"\"\"
@@ -134,6 +181,7 @@ _HUMANIZE_PROMPT = textwrap.dedent("""\
 
 def humanize(text: str) -> str:
     return _call(_HUMANIZE_PROMPT.format(text=text))
+
 
 _ASK_PROMPT = textwrap.dedent("""\
     Answer the following clearly and naturally — like a knowledgeable friend,
@@ -147,6 +195,7 @@ def ask(prompt: str, context: str = "") -> str:
     block = f"Reference:\n---\n{context[:2500]}\n---\n\n" if context.strip() else ""
     return _call(_ASK_PROMPT.format(context_block=block, prompt=prompt))
 
+
 _FACTS_PROMPT = textwrap.dedent("""\
     Provide accurate, interesting information on the following topic.
     Write naturally — no lists unless asked. Under 200 words unless more is needed.
@@ -158,6 +207,7 @@ _FACTS_PROMPT = textwrap.dedent("""\
 def facts(topic: str, context: str = "") -> str:
     block = f"Background:\n---\n{context[:2500]}\n---\n\n" if context.strip() else ""
     return _call(_FACTS_PROMPT.format(context_block=block, topic=topic))
+
 
 _SUMMARIZE_PROMPT = textwrap.dedent("""\
     Summarize the following into clear, concise key points. Use natural prose

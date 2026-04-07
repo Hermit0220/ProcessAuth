@@ -1352,3 +1352,12 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11434
 2026-04-07 11:03:17 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
 2026-04-07 11:04:46 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
 2026-04-07 11:05:07 | ERROR    | ai.ninja_client | Ninja weather error for 'kandy': 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/weather?city=kandy
+2026-04-07 11:16:11 | ERROR    | ai.ninja_client | Ninja weather error for 'kandy': 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/weather?city=kandy
+2026-04-07 11:17:09 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:17:09 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 11:17:37 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:17:37 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 11:18:12 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:18:12 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-07 11:22:04 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-07 11:22:04 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db

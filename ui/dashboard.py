@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
     QMessageBox, QComboBox, QTabWidget, QSizeGrip,
 )
 
+from ui.theme import theme_manager
+
 from analysis.behavioral_engine import SessionStats
 from utils.logger import get_logger
 
@@ -59,7 +61,7 @@ class StatCard(QFrame):
 
         self._lbl = QLabel(label.upper())
         self._lbl.setStyleSheet(
-            "font-size:9px;font-weight:700;color:#334155;"
+            "font-size:9px;font-weight:700;"
             "letter-spacing:1.8px;background:transparent;border:none;"
         )
 
@@ -71,6 +73,22 @@ class StatCard(QFrame):
 
         layout.addWidget(self._lbl)
         layout.addWidget(self._val)
+        
+        self.apply_theme()
+        theme_manager.theme_changed.connect(self.apply_theme)
+
+    def apply_theme(self):
+        self.setStyleSheet(f"""
+            QFrame {{
+                background: {theme_manager.get('glass_bg')};
+                border: 1px solid {theme_manager.get('border_subtle')};
+                border-radius: 14px;
+            }}
+        """)
+        self._lbl.setStyleSheet(
+            f"font-size:9px;font-weight:700;color:{theme_manager.get('text_muted')};"
+            "letter-spacing:1.8px;background:transparent;border:none;"
+        )
 
     def set_value(self, v: str) -> None:
         self._val.setText(v)
@@ -98,7 +116,9 @@ class ScoreArc(QWidget):
         rect = self.rect().adjusted(margin, margin, -margin, -margin)
 
         # Track ring
-        pen = QPen(QColor(255, 255, 255, 14), 12, Qt.SolidLine, Qt.FlatCap)
+        pen_color = QColor(theme_manager.get('text_muted'))
+        pen_color.setAlpha(20)
+        pen = QPen(pen_color, 12, Qt.SolidLine, Qt.FlatCap)
         painter.setPen(pen)
         painter.drawArc(rect, 225 * 16, -270 * 16)
 
@@ -155,7 +175,7 @@ class Dashboard(QMainWindow):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         p.setPen(Qt.NoPen)
-        p.setBrush(QBrush(QColor(3, 7, 18, 252)))
+        p.setBrush(QBrush(theme_manager.get("window_bg")))
         p.drawRect(self.rect())
 
     # ── dragging ──────────────────────────────────────────────────────────────
@@ -187,20 +207,6 @@ class Dashboard(QMainWindow):
 
         # Tab container
         self._tabs = QTabWidget()
-        self._tabs.setStyleSheet("""
-            QTabWidget::pane { border: none; background: transparent; }
-            QTabBar::tab {
-                background: rgba(255,255,255,0.03); color: #334155;
-                border: 1px solid rgba(255,255,255,0.06); border-bottom: none;
-                border-radius: 8px 8px 0 0; padding: 8px 22px;
-                font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-right: 4px;
-            }
-            QTabBar::tab:selected {
-                background: rgba(6,182,212,0.10); color: #06b6d4;
-                border-color: rgba(6,182,212,0.25);
-            }
-            QTabBar::tab:hover:!selected { background: rgba(255,255,255,0.06); color: #94a3b8; }
-        """)
 
         # Tab 1 - Monitor
         monitor_widget = QWidget()
@@ -219,100 +225,244 @@ class Dashboard(QMainWindow):
 
         root.addWidget(self._tabs)
         root.addWidget(self._build_status_bar())
+        
+        # Apply theme AFTER all widgets created
+        self.apply_theme()
+        theme_manager.theme_changed.connect(self.apply_theme)
 
     # ── title bar ─────────────────────────────────────────────────────────────
 
     def _build_title_bar(self) -> QWidget:
-        bar = QWidget()
-        bar.setFixedHeight(52)
-        bar.setStyleSheet(
-            "background: rgba(255,255,255,0.03);"
-            "border-bottom: 1px solid rgba(255,255,255,0.06);"
-        )
-        lay = QHBoxLayout(bar)
+        self._title_bar_widget = QWidget()
+        self._title_bar_widget.setFixedHeight(52)
+        lay = QHBoxLayout(self._title_bar_widget)
         lay.setContentsMargins(20, 0, 14, 0)
         lay.setSpacing(0)
 
-        # Logo + title
-        icon = QLabel("⬡")
-        icon.setStyleSheet("font-size:18px; color:#06b6d4; background:transparent;")
-        title = QLabel("  ProcessAuth")
-        title.setStyleSheet("font-size:15px;font-weight:800;color:#06b6d4;background:transparent;letter-spacing:0.5px;")
-        sub = QLabel("  ·  Behavioral Authentisizer by Hermit")
-        sub.setStyleSheet("font-size:11px;color:#1e3a4a;background:transparent;")
+        # Logo + title — styled dynamically by apply_theme
+        self._logo_icon  = QLabel("⬡")
+        self._logo_title = QLabel("  ProcessAuth")
+        self._logo_sub   = QLabel("  ·  Behavioral Authentisizer by Hermit")
 
         # Status pill
         self._status_pill = QLabel("● IDLE")
-        self._status_pill.setStyleSheet(
-            "font-size:10px;font-weight:700;letter-spacing:1.5px;"
-            "padding:4px 14px;border-radius:20px;"
-            "background:rgba(148,163,184,0.10);color:#475569;"
-            "border:1px solid rgba(148,163,184,0.20);margin-right:10px;"
-        )
+        # We will style these via apply_theme
+        
+        # Theme toggle button
+        self._btn_theme = QPushButton("☀")
+        self._btn_theme.setFixedSize(30, 30)
+        self._btn_theme.setCursor(Qt.PointingHandCursor)
+        self._btn_theme.clicked.connect(theme_manager.toggle)
 
         # Timer
         self._timer_label = QLabel("00:00:00")
-        self._timer_label.setStyleSheet(
-            "font-size:14px;font-weight:600;color:#334155;"
-            "font-family:Consolas,monospace;background:transparent;margin-right:16px;"
-        )
 
         # ── Window control buttons ─────────────────────────────────────────────
         #    Fully visible — light on dark, with hover states set via
         #    inline stylesheet (avoids cursor: pointer QSS warning)
 
-        btn_min = QPushButton("—")
-        btn_min.setFixedSize(30, 30)
-        btn_min.setCursor(Qt.PointingHandCursor)
-        btn_min.setStyleSheet("""
-            QPushButton {
-                background: rgba(30,30,40, 200);
-                border: 1px solid rgba(255,255,255,10);
-                padding: 10px;
-                border-radius: 8px;
-                font-weight: 700;
-            }
-            QPushButton:hover {
-                background: rgba(255,255,255,0.16);
-                color: #e2e8f0;
-                border-color: rgba(255,255,255,0.25);
-            }
-            QPushButton:pressed { background: rgba(255,255,255,0.05); }
-        """)
-        btn_min.clicked.connect(self.showMinimized)
+        self._btn_min = QPushButton("—")
+        self._btn_min.setFixedSize(30, 30)
+        self._btn_min.setCursor(Qt.PointingHandCursor)
+        self._btn_min.clicked.connect(self.showMinimized)
 
-        btn_close = QPushButton("✕")
-        btn_close.setFixedSize(30, 30)
-        btn_close.setCursor(Qt.PointingHandCursor)
-        btn_close.setStyleSheet("""
-            QPushButton {
-                background: rgba(239,68,68,0.12);
-                color: #ef4444;
-                border: 1px solid rgba(239,68,68,0.25);
-                border-radius: 8px;
-                font-size: 12px;
-                font-weight: 700;
-            }
-            QPushButton:hover {
-                background: rgba(239,68,68,0.28);
-                color: #ffffff;
-                border-color: #ef4444;
-            }
-            QPushButton:pressed { background: #dc2626; color:#fff; }
-        """)
-        btn_close.clicked.connect(self._safe_close)
+        self._btn_close = QPushButton("✕")
+        self._btn_close.setFixedSize(30, 30)
+        self._btn_close.setCursor(Qt.PointingHandCursor)
+        self._btn_close.clicked.connect(self._safe_close)
 
-        lay.addWidget(icon)
-        lay.addWidget(title)
-        lay.addWidget(sub)
+        lay.addWidget(self._logo_icon)
+        lay.addWidget(self._logo_title)
+        lay.addWidget(self._logo_sub)
         lay.addStretch()
         lay.addWidget(self._status_pill)
+        lay.addWidget(self._btn_theme)
         lay.addWidget(self._timer_label)
         lay.addSpacing(8)
-        lay.addWidget(btn_min)
+        lay.addWidget(self._btn_min)
         lay.addSpacing(6)
-        lay.addWidget(btn_close)
-        return bar
+        lay.addWidget(self._btn_close)
+        
+        return self._title_bar_widget
+
+    def apply_theme(self):
+        t = theme_manager
+        self._title_bar_widget.setStyleSheet(f"""
+            background: {t.get('title_bar')};
+            border-bottom: 1px solid {t.get('border_subtle')};
+        """)
+        # Logo / branding labels
+        if hasattr(self, '_logo_icon'):
+            self._logo_icon.setStyleSheet(f"font-size:18px;color:{t.get('cyan')};background:transparent;")
+            self._logo_title.setStyleSheet(f"font-size:15px;font-weight:800;color:{t.get('cyan')};background:transparent;letter-spacing:0.5px;")
+            self._logo_sub.setStyleSheet(f"font-size:11px;color:{t.get('text_muted')};background:transparent;")
+        # Minimize button adapts to mode
+        if hasattr(self, '_btn_min'):
+            self._btn_min.setStyleSheet(f"""
+                QPushButton {{
+                    background: {t.get('glass_bg')};
+                    border: 1px solid {t.get('border_subtle')};
+                    border-radius: 8px; font-weight:800; font-size: 14px;
+                    color:{t.get('text_main')};
+                }}
+                QPushButton:hover {{
+                    background: {t.get('glass_hover')};
+                    border-color: {t.get('border_glow')};
+                }}
+                QPushButton:pressed {{ opacity: 0.7; }}
+            """)
+        # Close button styling
+        if hasattr(self, '_btn_close'):
+            self._btn_close.setStyleSheet(f"""
+                QPushButton {{
+                    background: {t.get('red_bg')};
+                    color: {t.get('red')};
+                    border: 1px solid rgba(239,68,68,0.25);
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 800;
+                }}
+                QPushButton:hover {{
+                    background: rgba(239,68,68,0.8);
+                    color: #ffffff;
+                    border-color: #ef4444;
+                }}
+                QPushButton:pressed {{ background: #dc2626; color:#fff; }}
+            """)
+        self._status_pill.setStyleSheet(f"""
+            font-size:10px;font-weight:700;letter-spacing:1.5px;
+            padding:4px 14px;border-radius:20px;
+            background: {theme_manager.get('glass_hover')};
+            color: {theme_manager.get('text_muted')};
+            border:1px solid {theme_manager.get('border_subtle')};
+            margin-right:10px;
+        """)
+        self._timer_label.setStyleSheet(f"""
+            font-size:14px;font-weight:600;color:{theme_manager.get('text_main')};
+            font-family:Consolas,monospace;background:transparent;margin-right:16px;
+        """)
+        self._btn_theme.setText("🌙" if theme_manager.mode == "light" else "☀️")
+        self._btn_theme.setStyleSheet(f"""
+            QPushButton {{
+                background: {theme_manager.get('glass_bg')};
+                border: 1px solid {theme_manager.get('border_subtle')};
+                border-radius: 8px;
+                font-size: 14px;
+                color: {theme_manager.get('text_main')};
+                margin-right: 12px;
+            }}
+            QPushButton:hover {{
+                background: {theme_manager.get('glass_hover')};
+            }}
+            QPushButton:pressed {{ opacity: 0.7; }}
+        """)
+        
+        if hasattr(self, '_tabs'):
+            self._tabs.setStyleSheet(f"""
+                QTabWidget::pane {{ border: none; background: transparent; }}
+                QTabBar::tab {{
+                    background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('text_muted')};
+                    border: 1px solid {theme_manager.get('border_subtle')}; border-bottom: none;
+                    border-radius: 8px 8px 0 0; padding: 8px 22px;
+                    font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-right: 4px;
+                }}
+                QTabBar::tab:selected {{
+                    background: {theme_manager.get('cyan_bg')}; color: {theme_manager.get('cyan')};
+                    border-color: {theme_manager.get('cyan')};
+                }}
+                QTabBar::tab:hover:!selected {{ background: {theme_manager.get('glass_hover')}; }}
+            """)
+
+        # Middle Panels
+        for panel in getattr(self, '_glass_panels', []):
+            panel.setStyleSheet(f"""
+                QFrame {{
+                    background: {theme_manager.get('glass_bg')};
+                    border: 1px solid {theme_manager.get('border_subtle')};
+                    border-radius: 14px;
+                }}
+            """)
+        for lbl in getattr(self, '_section_labels', []):
+            lbl.setStyleSheet(f"font-size:9px;font-weight:700;color:{theme_manager.get('text_main')};"
+                              "letter-spacing:2px;background:transparent;border:none;")
+        
+        # Log Panel
+        if hasattr(self, '_log_widget'):
+            self._log_widget.setStyleSheet(f"""
+                background: {theme_manager.get('input_bg')};
+                border:1px solid {theme_manager.get('border_subtle')};
+                border-radius:10px;font-family:Consolas,monospace;font-size:11px;
+                color:{theme_manager.get('text_muted')};padding:10px;
+            """)
+            
+        # Status Bar
+        if hasattr(self, '_status_bar_widget'):
+            self._status_bar_widget.setStyleSheet(f"""
+                background: {theme_manager.get('glass_bg')};
+                border-top:1px solid {theme_manager.get('border_subtle')};
+            """)
+            self._status_text.setStyleSheet(f"font-size:10px;color:{theme_manager.get('text_muted')};background:transparent;")
+            self._ver.setStyleSheet(f"font-size:10px;color:{theme_manager.get('text_muted')};background:transparent;")
+
+        # Export Combobox & Text colors
+        if hasattr(self, '_export_fmt'):
+            self._doc_label.setStyleSheet(f"font-size:12px;color:{theme_manager.get('text_main')};background:transparent;border:none;")
+            
+            # Update metrics rows texts
+            for attr in ['_m_keys','_m_typed','_m_pasted','_m_back','_m_speed','_m_clip','_m_susp','_m_ext','_m_pen']:
+                if hasattr(self, attr):
+                    lbl = getattr(self, attr)
+                    lbl.setStyleSheet(f"font-size:12px;color:{theme_manager.get('text_main')};font-weight:600;background:transparent;")
+            
+            self._export_fmt.setStyleSheet(f"""
+                QComboBox {{
+                    background: {theme_manager.get('input_bg')};
+                    border: 1px solid {theme_manager.get('border_subtle')};
+                    border-radius: 10px;
+                    padding: 0 12px;
+                    color: {theme_manager.get('text_main')};
+                    font-size: 12px;
+                    font-weight: 600;
+                }}
+                QComboBox::drop-down {{ border: none; }}
+                QComboBox QAbstractItemView {{
+                    background: {theme_manager.get('glass_bg_solid')};
+                    border: 1px solid {theme_manager.get('border_subtle')};
+                    selection-background-color: {theme_manager.get('cyan_bg')};
+                    color: {theme_manager.get('text_main')};
+                }}
+            """)
+            
+            self._btn_start.setStyleSheet(f"""
+                QPushButton {{
+                    background: {theme_manager.get('cyan')};
+                    color: #ffffff; border: 1px solid {theme_manager.get('cyan')};
+                    border-radius: 10px; font-size: 13px; font-weight: 700; padding: 0 18px;
+                }}
+                QPushButton:hover {{ filter: brightness(1.15); opacity: 0.9; }}
+                QPushButton:disabled {{ background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('text_muted')}; border-color: {theme_manager.get('border_subtle')}; }}
+            """)
+            
+            if self._paused:
+                self._btn_pause.setStyleSheet(f"""
+                    QPushButton {{ background: {theme_manager.get('yellow')}; color: #ffffff; border: 1px solid {theme_manager.get('yellow')}; border-radius: 10px; font-size: 13px; font-weight: 700; padding: 0 18px; }}
+                    QPushButton:hover {{ filter: brightness(1.15); }}
+                    QPushButton:disabled {{ background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('text_muted')}; border-color: {theme_manager.get('border_subtle')}; }}
+                """)
+            else:
+                self._btn_pause.setStyleSheet(f"""
+                    QPushButton {{ background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('yellow')}; border: 1px solid {theme_manager.get('yellow')}; border-radius: 10px; font-size: 13px; font-weight: 700; padding: 0 18px; }}
+                    QPushButton:hover {{ filter: brightness(1.15); }}
+                    QPushButton:disabled {{ background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('text_muted')}; border-color: {theme_manager.get('border_subtle')}; }}
+                """)
+                
+            self._btn_stop.setStyleSheet(f"""
+                QPushButton {{ background: {theme_manager.get('red')}; color: #ffffff; border: 1px solid {theme_manager.get('red')}; border-radius: 10px; font-size: 13px; font-weight: 700; padding: 0 18px; }}
+                QPushButton:hover {{ filter: brightness(1.15); }}
+                QPushButton:disabled {{ background: {theme_manager.get('glass_bg')}; color: {theme_manager.get('text_muted')}; border-color: {theme_manager.get('border_subtle')}; }}
+            """)
+
+        self.update()
 
     # ── left panel ────────────────────────────────────────────────────────────
 
@@ -323,12 +473,12 @@ class Dashboard(QMainWindow):
         # ── Score arc card ─────────────────────────────────────────────────
         score_card = QFrame()
         score_card.setMinimumHeight(270)
-        score_card.setStyleSheet("""
-            QFrame {
-                background: rgba(6,182,212,0.04);
-                border: 1px solid rgba(6,182,212,0.14);
+        score_card.setStyleSheet(f"""
+            QFrame {{
+                background: {theme_manager.get('cyan_bg')};
+                border: 1px solid {theme_manager.get('cyan')}22;
                 border-radius: 16px;
-            }
+            }}
         """)
         sc = QVBoxLayout(score_card)
         sc.setContentsMargins(18, 16, 18, 16)
@@ -337,7 +487,7 @@ class Dashboard(QMainWindow):
         slbl = QLabel("AUTHENTICITY SCORE")
         slbl.setAlignment(Qt.AlignCenter)
         slbl.setStyleSheet(
-            "font-size:9px;font-weight:700;color:#164e63;"
+            f"font-size:9px;font-weight:700;color:{theme_manager.get('cyan')};"
             "letter-spacing:2px;background:transparent;border:none;"
         )
 
@@ -367,9 +517,6 @@ class Dashboard(QMainWindow):
         dc.addWidget(self._section_lbl("Document Monitored"))
         self._doc_label = QLabel("No document selected")
         self._doc_label.setWordWrap(True)
-        self._doc_label.setStyleSheet(
-            "font-size:12px;color:#334155;background:transparent;border:none;"
-        )
         dc.addWidget(self._doc_label)
         col.addWidget(doc_card)
 
@@ -520,10 +667,8 @@ class Dashboard(QMainWindow):
         for label, attr in rows:
             row = QHBoxLayout()
             lw = QLabel(label)
-            lw.setStyleSheet("font-size:12px;color:#334155;background:transparent;")
             vw = QLabel("—")
             vw.setAlignment(Qt.AlignRight)
-            vw.setStyleSheet("font-size:12px;color:#64748b;font-weight:600;background:transparent;")
             row.addWidget(lw)
             row.addStretch()
             row.addWidget(vw)
@@ -533,8 +678,8 @@ class Dashboard(QMainWindow):
         col.addWidget(metrics_card)
 
         # ── Event log card ─────────────────────────────────────────────────
-        log_card = self._glass_card()
-        ll = QVBoxLayout(log_card)
+        self._log_card = self._glass_card()
+        ll = QVBoxLayout(self._log_card)
         ll.setContentsMargins(16, 14, 16, 14)
         ll.setSpacing(6)
         ll.addWidget(self._section_lbl("Live Event Log"))
@@ -544,11 +689,6 @@ class Dashboard(QMainWindow):
         self._log_widget.setWordWrap(True)
         self._log_widget.setTextFormat(Qt.RichText)
         self._log_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._log_widget.setStyleSheet(
-            "background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.05);"
-            "border-radius:10px;font-family:Consolas,monospace;font-size:11px;"
-            "color:#334155;padding:10px;"
-        )
 
         scroll = QScrollArea()
         scroll.setWidget(self._log_widget)
@@ -556,51 +696,38 @@ class Dashboard(QMainWindow):
         scroll.setStyleSheet("background:transparent;border:none;")
         scroll.setMinimumHeight(160)
         ll.addWidget(scroll)
-        col.addWidget(log_card, stretch=1)
+        col.addWidget(self._log_card, stretch=1)
 
         return col
 
     # ── status bar ────────────────────────────────────────────────────────────
 
     def _build_status_bar(self) -> QWidget:
-        bar = QWidget()
-        bar.setFixedHeight(28)
-        bar.setStyleSheet(
-            "background:rgba(255,255,255,0.015);"
-            "border-top:1px solid rgba(255,255,255,0.04);"
-        )
-        lay = QHBoxLayout(bar)
+        self._status_bar_widget = QWidget()
+        self._status_bar_widget.setFixedHeight(28)
+        lay = QHBoxLayout(self._status_bar_widget)
         lay.setContentsMargins(20, 0, 20, 0)
         self._status_text = QLabel("Ready — select a .docx and start a session")
-        self._status_text.setStyleSheet("font-size:10px;color:#1e3a4a;background:transparent;")
         lay.addWidget(self._status_text)
         lay.addStretch()
-        ver = QLabel("ProcessAuth by Hermit  ·  DuckDuckGo + Wikipedia")
-        ver.setStyleSheet("font-size:10px;color:#0f2027;background:transparent;")
-        lay.addWidget(ver)
-        return bar
+        self._ver = QLabel("ProcessAuth by Hermit  ·  DuckDuckGo + Wikipedia + Internet Archive")
+        lay.addWidget(self._ver)
+        return self._status_bar_widget
 
     # ── helpers ───────────────────────────────────────────────────────────────
 
-    @staticmethod
-    def _glass_card() -> QFrame:
+    def _glass_card(self) -> QFrame:
         f = QFrame()
-        f.setStyleSheet("""
-            QFrame {
-                background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-            }
-        """)
+        if not hasattr(self, '_glass_panels'):
+            self._glass_panels = []
+        self._glass_panels.append(f)
         return f
 
-    @staticmethod
-    def _section_lbl(text: str) -> QLabel:
+    def _section_lbl(self, text: str) -> QLabel:
         lbl = QLabel(text.upper())
-        lbl.setStyleSheet(
-            "font-size:9px;font-weight:700;color:#1e3a4a;"
-            "letter-spacing:2px;background:transparent;border:none;"
-        )
+        if not hasattr(self, '_section_labels'):
+            self._section_labels = []
+        self._section_labels.append(lbl)
         return lbl
 
     def _set_status(self, text: str, dot_color: str, pill_bg: str, pill_border: str) -> None:

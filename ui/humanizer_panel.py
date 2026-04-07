@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
     QLineEdit, QFrame, QSizePolicy, QApplication,
 )
 from utils.logger import get_logger
+from ui.theme import theme_manager
+from ai import ollama_client
 
 logger = get_logger(__name__)
 
@@ -42,16 +44,17 @@ class _Worker(QThread):
     error_occurred = Signal(str)
     mode_detected  = Signal(str)
 
-    def __init__(self, text: str, mode: str, city: str) -> None:
+    def __init__(self, text: str, mode: str, city: str, llm_model: str) -> None:
         super().__init__()
         self._text = text
         self._mode = mode
         self._city = city
+        self._llm_model = llm_model
 
     def run(self) -> None:
         try:
             from ai import humanizer_engine as engine
-            from ai.groq_client import detect_mode_local
+            from ai.ollama_client import detect_mode_local
             mode = self._mode
 
             # Show badge instantly using local heuristic (zero API cost)
@@ -60,7 +63,7 @@ class _Worker(QThread):
                 self.mode_detected.emit(local_mode)
 
             # Single Gemini call inside engine.process()
-            result = engine.process(self._text, mode=mode, city=self._city)
+            result = engine.process(self._text, mode=mode, llm_model=self._llm_model, city=self._city)
             self.result_ready.emit(result)
 
         except Exception as exc:
@@ -113,27 +116,6 @@ class _QuickWorker(QThread):
 
 # ── Style helpers ──────────────────────────────────────────────────────────────
 
-def _glass_card(border: str = "rgba(255,255,255,0.07)") -> QFrame:
-    f = QFrame()
-    f.setStyleSheet(f"""
-        QFrame {{
-            background: rgba(255,255,255,0.04);
-            border: 1px solid {border};
-            border-radius: 14px;
-        }}
-    """)
-    return f
-
-
-def _section_lbl(text: str, color: str = "#1e3a4a") -> QLabel:
-    lbl = QLabel(text.upper())
-    lbl.setStyleSheet(
-        f"font-size:9px;font-weight:700;color:{color};"
-        "letter-spacing:2px;background:transparent;border:none;"
-    )
-    return lbl
-
-
 def _btn(text: str, bg: str, fg: str = "#fff",
          border: str = "transparent", h: int = 36) -> QPushButton:
     b = QPushButton(text)
@@ -148,7 +130,7 @@ def _btn(text: str, bg: str, fg: str = "#fff",
         QPushButton:hover   {{ border-color: rgba(255,255,255,0.25); }}
         QPushButton:pressed {{ opacity: 0.7; }}
         QPushButton:disabled {{
-            background: rgba(255,255,255,0.04); color: #1e3a4a;
+            background: rgba(255,255,255,0.04); color: #94a3b8;
             border-color: rgba(255,255,255,0.06);
         }}
     """)
@@ -168,7 +150,42 @@ class HumanizerPanel(QWidget):
         self._dot_timer    = QTimer(self)
         self._dot_count    = 0
         self._dot_timer.timeout.connect(self._animate_dots)
+        self._glass_panels: list = []
+        self._section_labels: list = []
         self._build_ui()
+        self.apply_theme()
+        theme_manager.theme_changed.connect(self.apply_theme)
+        self._populate_models()
+        
+    def _populate_models(self):
+        models = ollama_client.fetch_local_models()
+        if not models:
+            self._model_combo.addItem("llama3.2:latest")
+        else:
+            for m in models:
+                self._model_combo.addItem(m)
+        self._populate_models()
+        
+    def _populate_models(self):
+        self._model_combo.clear()
+        
+        # Preferred custom-trained models first
+        preferred = ["processauth-llama", "processauth-gemma"]
+        
+        models = ollama_client.fetch_local_models()
+        # Put custom trained models at the top
+        for name in preferred:
+            if name in models:
+                self._model_combo.addItem(f"✦ Custom Trained · {name}")
+                models.remove(name)
+        # Remaining Ollama models
+        for m in models:
+            self._model_combo.addItem(m)
+        # Fallback if Ollama is empty
+        if self._model_combo.count() == 0:
+            self._model_combo.addItem("llama3.2:latest")
+        # Cloud option always at the end
+        self._model_combo.addItem("🥷 Ninja")
 
     # ── UI Layout ─────────────────────────────────────────────────────────────
 
@@ -182,30 +199,35 @@ class HumanizerPanel(QWidget):
         root.addWidget(self._build_input_card(), stretch=2)
         root.addWidget(self._build_output_card(), stretch=3)
 
+    def _glass_card(self, border: str = "") -> QFrame:
+        f = QFrame()
+        self._glass_panels.append(f)
+        return f
+
+    def _section_lbl(self, text: str) -> QLabel:
+        lbl = QLabel(text.upper())
+        self._section_labels.append(lbl)
+        return lbl
+
     def _build_header(self) -> QWidget:
         w = QWidget(); w.setStyleSheet("background:transparent;")
         lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0)
 
-        icon = QLabel("✦")
-        icon.setStyleSheet("font-size:20px;color:#8b5cf6;background:transparent;border:none;")
-        title = QLabel("AI Humanizer")
-        title.setStyleSheet(
-            "font-size:16px;font-weight:800;color:#e2e8f0;"
-            "background:transparent;border:none;letter-spacing:0.5px;"
-        )
-        sub = QLabel("  ·  Gemini · Ninja APIs · Wikipedia")
-        sub.setStyleSheet("font-size:11px;color:#1e3a4a;background:transparent;border:none;")
+        self._h_icon = QLabel("✦")
+        self._h_icon.setStyleSheet("font-size:20px;color:#8b5cf6;background:transparent;border:none;")
+        self._h_title = QLabel("AI Humanizer")
+        self._h_sub = QLabel("  ·  Ollama · Ninja APIs · Wikipedia")
 
-        lay.addWidget(icon); lay.addWidget(title); lay.addWidget(sub)
+        lay.addWidget(self._h_icon); lay.addWidget(self._h_title); lay.addWidget(self._h_sub)
         lay.addStretch()
         return w
 
     def _build_quick_bar(self) -> QFrame:
-        card = _glass_card("rgba(255,255,255,0.06)")
+        card = self._glass_card()
         lay  = QHBoxLayout(card)
         lay.setContentsMargins(16, 10, 16, 10); lay.setSpacing(10)
 
-        lay.addWidget(_section_lbl("Quick Actions", "#164e63"))
+        lay.addWidget(self._section_lbl("Quick Actions"))
         lay.addSpacing(6)
 
         self._btn_fact    = _btn("⚡  Random Fact",    "rgba(6,182,212,0.12)",  "#06b6d4", "rgba(6,182,212,0.30)")
@@ -215,13 +237,6 @@ class HumanizerPanel(QWidget):
         self._city_input = QLineEdit()
         self._city_input.setPlaceholderText("City…")
         self._city_input.setFixedSize(110, 36)
-        self._city_input.setStyleSheet("""
-            QLineEdit {
-                background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
-                border-radius: 10px; padding: 0 10px; color: #e2e8f0; font-size: 12px;
-            }
-            QLineEdit:focus { border-color: rgba(245,158,11,0.50); }
-        """)
 
         self._btn_fact.clicked.connect(self._on_quick_fact)
         self._btn_quote.clicked.connect(self._on_quick_quote)
@@ -238,52 +253,41 @@ class HumanizerPanel(QWidget):
         w = QWidget(); w.setStyleSheet("background:transparent;")
         lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0); lay.setSpacing(12)
 
-        lbl = QLabel("Mode:")
-        lbl.setStyleSheet("font-size:12px;font-weight:700;color:#64748b;background:transparent;border:none;")
+        self._mode_lbl = QLabel("Mode:")
 
         self._mode_combo = QComboBox()
         for key, display in DISPLAY_NAMES.items():
             self._mode_combo.addItem(f"{MODES[key][0]}  {display}", userData=key)
         self._mode_combo.setCurrentIndex(0)
         self._mode_combo.setFixedSize(220, 36)
-        self._mode_combo.setStyleSheet("""
-            QComboBox {
-                background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-                border-radius: 10px; padding: 0 12px; color: #e2e8f0;
-                font-size: 12px; font-weight: 600;
-            }
-            QComboBox::drop-down { border: none; width: 20px; }
-            QComboBox QAbstractItemView {
-                background: #0f172a; border: 1px solid rgba(255,255,255,0.1);
-                selection-background-color: rgba(139,92,246,0.25); color: #e2e8f0;
-            }
-        """)
         self._mode_combo.currentIndexChanged.connect(self._on_mode_change)
 
         self._mode_badge = QLabel("")
         self._mode_badge.hide()
-        self._mode_badge.setStyleSheet(
-            "font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;"
-            "background:rgba(139,92,246,0.12);color:#8b5cf6;border:1px solid rgba(139,92,246,0.28);"
-        )
+        
+        # MODEL SELECTOR
+        self._model_lbl = QLabel("Model:")
+        self._model_combo = QComboBox()
+        self._model_combo.setFixedSize(180, 36)
 
         self._mode_hint = QLabel(MODES["Auto"][2])
-        self._mode_hint.setStyleSheet("font-size:11px;color:#334155;background:transparent;border:none;")
 
-        lay.addWidget(lbl); lay.addWidget(self._mode_combo); lay.addWidget(self._mode_badge)
-        lay.addStretch(); lay.addWidget(self._mode_hint)
+        lay.addWidget(self._mode_lbl); lay.addWidget(self._mode_combo); lay.addWidget(self._mode_badge)
+        lay.addStretch()
+        lay.addWidget(self._model_lbl); lay.addWidget(self._model_combo)
+        lay.addSpacing(16)
+        lay.addWidget(self._mode_hint)
         return w
 
     def _build_input_card(self) -> QFrame:
-        card = _glass_card()
+        card = self._glass_card()
         lay  = QVBoxLayout(card)
         lay.setContentsMargins(16, 14, 16, 14); lay.setSpacing(10)
 
         top = QHBoxLayout()
-        top.addWidget(_section_lbl("Your Input"))
+        top.addWidget(self._section_lbl("Your Input"))
         top.addStretch()
         self._char_count = QLabel("0 chars")
-        self._char_count.setStyleSheet("font-size:10px;color:#1e3a4a;background:transparent;border:none;")
         top.addWidget(self._char_count)
         lay.addLayout(top)
 
@@ -297,15 +301,6 @@ class HumanizerPanel(QWidget):
             "  • Weather in London"
         )
         self._input_box.setMinimumHeight(100)
-        self._input_box.setStyleSheet("""
-            QTextEdit {
-                background: rgba(0,0,0,0.20); border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 10px; color: #e2e8f0; font-size: 13px;
-                font-family: 'Segoe UI', 'Inter', sans-serif; padding: 10px;
-                selection-background-color: rgba(139,92,246,0.35);
-            }
-            QTextEdit:focus { border-color: rgba(139,92,246,0.40); }
-        """)
         self._input_box.textChanged.connect(
             lambda: self._char_count.setText(f"{len(self._input_box.toPlainText()):,} chars")
         )
@@ -332,20 +327,14 @@ class HumanizerPanel(QWidget):
         return card
 
     def _build_output_card(self) -> QFrame:
-        self._output_card = _glass_card()
+        self._output_card = self._glass_card()
         lay = QVBoxLayout(self._output_card)
         lay.setContentsMargins(16, 14, 16, 14); lay.setSpacing(10)
 
         top = QHBoxLayout()
-        top.addWidget(_section_lbl("Result"))
+        top.addWidget(self._section_lbl("Result"))
         top.addStretch()
         self._status_pill = QLabel("● IDLE")
-        self._status_pill.setStyleSheet(
-            "font-size:10px;font-weight:700;letter-spacing:1.5px;"
-            "padding:3px 12px;border-radius:20px;"
-            "background:rgba(148,163,184,0.10);color:#475569;"
-            "border:1px solid rgba(148,163,184,0.20);"
-        )
         top.addWidget(self._status_pill)
         lay.addLayout(top)
 
@@ -353,19 +342,10 @@ class HumanizerPanel(QWidget):
         self._output_box.setReadOnly(True)
         self._output_box.setPlaceholderText("Your result will appear here…")
         self._output_box.setMinimumHeight(130)
-        self._output_box.setStyleSheet("""
-            QTextEdit {
-                background: rgba(0,0,0,0.20); border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 10px; color: #e2e8f0; font-size: 13px;
-                font-family: 'Segoe UI', 'Inter', sans-serif; padding: 10px;
-                selection-background-color: rgba(6,182,212,0.30);
-            }
-        """)
         lay.addWidget(self._output_box)
 
         copy_row = QHBoxLayout(); copy_row.setSpacing(8)
         self._word_count = QLabel("")
-        self._word_count.setStyleSheet("font-size:10px;color:#1e3a4a;background:transparent;border:none;")
         copy_row.addWidget(self._word_count)
         copy_row.addStretch()
 
@@ -401,6 +381,7 @@ class HumanizerPanel(QWidget):
             self._output_box.setPlainText("⚠  Please type something first.")
             return
         mode = self._mode_combo.currentData() or "Auto"
+        llm_model = self._model_combo.currentText()
         city = self._city_input.text().strip()
 
         self._set_thinking()
@@ -408,7 +389,7 @@ class HumanizerPanel(QWidget):
         self._btn_copy.setEnabled(False)
         self._mode_badge.hide()
 
-        self._worker = _Worker(text, mode, city)
+        self._worker = _Worker(text, mode, city, llm_model)
         self._worker.result_ready.connect(self._on_result)
         self._worker.error_occurred.connect(self._on_error)
         self._worker.mode_detected.connect(self._on_mode_detected)
@@ -512,7 +493,87 @@ class HumanizerPanel(QWidget):
         )
 
     def _reset_card_border(self) -> None:
-        self._output_card.setStyleSheet(
-            "QFrame{background:rgba(255,255,255,0.04);"
-            "border:1px solid rgba(255,255,255,0.07);border-radius:14px;}"
-        )
+        t = theme_manager
+        self._output_card.setStyleSheet(f"""
+            QFrame{{
+                background:{t.get('glass_bg')};
+                border:1px solid {t.get('border_subtle')};
+                border-radius:14px;
+            }}
+        """)
+
+    # ── Theme ─────────────────────────────────────────────────────────────────
+
+    def apply_theme(self) -> None:
+        t = theme_manager
+        # All glass panel cards
+        for panel in self._glass_panels:
+            panel.setStyleSheet(f"""
+                QFrame {{
+                    background: {t.get('glass_bg')};
+                    border: 1px solid {t.get('border_subtle')};
+                    border-radius: 14px;
+                }}
+            """)
+        # Section labels
+        for lbl in self._section_labels:
+            lbl.setStyleSheet(f"font-size:9px;font-weight:700;color:{t.get('text_muted')};"
+                              "letter-spacing:2px;background:transparent;border:none;")
+        # Header
+        if hasattr(self, '_h_title'):
+            self._h_title.setStyleSheet(f"font-size:16px;font-weight:800;color:{t.get('text_main')};"
+                                        "background:transparent;border:none;letter-spacing:0.5px;")
+            self._h_sub.setStyleSheet(f"font-size:11px;color:{t.get('text_muted')};background:transparent;border:none;")
+        # Mode row
+        if hasattr(self, '_mode_lbl'):
+            self._mode_lbl.setStyleSheet(f"font-size:12px;font-weight:700;color:{t.get('text_muted')};background:transparent;border:none;")
+            self._mode_hint.setStyleSheet(f"font-size:11px;color:{t.get('text_muted')};background:transparent;border:none;")
+            
+            combo_style = f"""
+                QComboBox {{
+                    background: {t.get('input_bg')}; border: 1px solid {t.get('border_glow')};
+                    border-radius: 10px; padding: 0 12px; color: {t.get('text_main')};
+                    font-size: 12px; font-weight: 600;
+                }}
+                QComboBox::drop-down {{ border: none; width: 20px; }}
+                QComboBox QAbstractItemView {{
+                    background: {t.get('glass_bg_solid')}; border: 1px solid {t.get('border_subtle')};
+                    selection-background-color: {t.get('purple_bg')}; color: {t.get('text_main')};
+                }}
+            """
+            self._mode_combo.setStyleSheet(combo_style)
+            
+            if hasattr(self, '_model_lbl'):
+                self._model_lbl.setStyleSheet(f"font-size:12px;font-weight:700;color:{t.get('text_muted')};background:transparent;border:none;")
+                self._model_combo.setStyleSheet(combo_style)
+        # Text inputs
+        if hasattr(self, '_input_box'):
+            self._input_box.setStyleSheet(f"""
+                QTextEdit {{
+                    background: {t.get('input_bg')}; border: 1px solid {t.get('border_subtle')};
+                    border-radius: 10px; color: {t.get('text_main')}; font-size: 13px;
+                    font-family: 'Segoe UI', 'Inter', sans-serif; padding: 10px;
+                    selection-background-color: {t.get('purple_bg')};
+                }}
+                QTextEdit:focus {{ border-color: {t.get('purple')}; }}
+            """)
+            self._char_count.setStyleSheet(f"font-size:10px;color:{t.get('text_muted')};background:transparent;border:none;")
+        if hasattr(self, '_output_box'):
+            self._output_box.setStyleSheet(f"""
+                QTextEdit {{
+                    background: {t.get('input_bg')}; border: 1px solid {t.get('border_subtle')};
+                    border-radius: 10px; color: {t.get('text_main')}; font-size: 13px;
+                    font-family: 'Segoe UI', 'Inter', sans-serif; padding: 10px;
+                    selection-background-color: {t.get('cyan_bg')};
+                }}
+            """)
+            self._word_count.setStyleSheet(f"font-size:10px;color:{t.get('text_muted')};background:transparent;border:none;")
+        # City input
+        if hasattr(self, '_city_input'):
+            self._city_input.setStyleSheet(f"""
+                QLineEdit {{
+                    background: {t.get('input_bg')}; border: 1px solid {t.get('border_glow')};
+                    border-radius: 10px; padding: 0 10px; color: {t.get('text_main')}; font-size: 12px;
+                }}
+                QLineEdit:focus {{ border-color: {t.get('yellow')}; }}
+            """)
