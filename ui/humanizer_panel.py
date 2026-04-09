@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QFrame, QSizePolicy, QApplication,
 )
 from utils.logger import get_logger
+from ai import ollama_client
 
 logger = get_logger(__name__)
 
@@ -42,11 +43,12 @@ class _Worker(QThread):
     error_occurred = Signal(str)
     mode_detected  = Signal(str)
 
-    def __init__(self, text: str, mode: str, city: str) -> None:
+    def __init__(self, text: str, mode: str, city: str, llm_model: str = "") -> None:
         super().__init__()
-        self._text = text
-        self._mode = mode
-        self._city = city
+        self._text      = text
+        self._mode      = mode
+        self._city      = city
+        self._llm_model = llm_model
 
     def run(self) -> None:
         try:
@@ -59,8 +61,8 @@ class _Worker(QThread):
                 local_mode = detect_mode_local(self._text)
                 self.mode_detected.emit(local_mode)
 
-            # Single Gemini call inside engine.process()
-            result = engine.process(self._text, mode=mode, city=self._city)
+            # Route through engine — passes selected model to Ollama/Ninja
+            result = engine.process(self._text, mode=mode, city=self._city, llm_model=self._llm_model)
             self.result_ready.emit(result)
 
         except Exception as exc:
@@ -169,6 +171,7 @@ class HumanizerPanel(QWidget):
         self._dot_count    = 0
         self._dot_timer.timeout.connect(self._animate_dots)
         self._build_ui()
+        self._populate_models()
 
     # ── UI Layout ─────────────────────────────────────────────────────────────
 
@@ -270,9 +273,46 @@ class HumanizerPanel(QWidget):
         self._mode_hint = QLabel(MODES["Auto"][2])
         self._mode_hint.setStyleSheet("font-size:11px;color:#334155;background:transparent;border:none;")
 
+        # ── Model selector ────────────────────────────────────────────────────
+        mdl_lbl = QLabel("Model:")
+        mdl_lbl.setStyleSheet("font-size:12px;font-weight:700;color:#64748b;background:transparent;border:none;")
+
+        self._model_combo = QComboBox()
+        self._model_combo.setFixedSize(240, 36)
+        self._model_combo.setStyleSheet("""
+            QComboBox {
+                background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 10px; padding: 0 12px; color: #e2e8f0;
+                font-size: 12px; font-weight: 600;
+            }
+            QComboBox::drop-down { border: none; width: 20px; }
+            QComboBox QAbstractItemView {
+                background: #0f172a; border: 1px solid rgba(255,255,255,0.1);
+                selection-background-color: rgba(139,92,246,0.25); color: #e2e8f0;
+            }
+        """)
+
         lay.addWidget(lbl); lay.addWidget(self._mode_combo); lay.addWidget(self._mode_badge)
-        lay.addStretch(); lay.addWidget(self._mode_hint)
+        lay.addStretch()
+        lay.addWidget(mdl_lbl); lay.addWidget(self._model_combo)
+        lay.addWidget(self._mode_hint)
         return w
+
+    def _populate_models(self) -> None:
+        self._model_combo.clear()
+        preferred = ["processauth-llama", "processauth-gemma"]
+        models    = ollama_client.fetch_local_models()
+        ollama_up = len(models) > 0
+
+        for name in preferred:
+            if name in models:
+                self._model_combo.addItem(f"✦ Custom Trained · {name}")
+                models.remove(name)
+        for m in models:
+            self._model_combo.addItem(m)
+        if not ollama_up:
+            self._model_combo.addItem("⚠  Ollama offline — start it first")
+        self._model_combo.addItem("🥷 Ninja")
 
     def _build_input_card(self) -> QFrame:
         card = _glass_card()
@@ -400,15 +440,16 @@ class HumanizerPanel(QWidget):
         if not text:
             self._output_box.setPlainText("⚠  Please type something first.")
             return
-        mode = self._mode_combo.currentData() or "Auto"
-        city = self._city_input.text().strip()
+        mode      = self._mode_combo.currentData() or "Auto"
+        city      = self._city_input.text().strip()
+        llm_model = self._model_combo.currentText().strip()
 
         self._set_thinking()
         self._btn_generate.setEnabled(False)
         self._btn_copy.setEnabled(False)
         self._mode_badge.hide()
 
-        self._worker = _Worker(text, mode, city)
+        self._worker = _Worker(text, mode, city, llm_model=llm_model)
         self._worker.result_ready.connect(self._on_result)
         self._worker.error_occurred.connect(self._on_error)
         self._worker.mode_detected.connect(self._on_mode_detected)
