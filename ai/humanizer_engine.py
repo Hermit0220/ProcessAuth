@@ -98,6 +98,7 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
     if not text:
         return "Please type something first."
 
+<<<<<<< Updated upstream
     # ── 🥷 Ninja engine: uses only Ninja APIs & Wikipedia — never Ollama ─────────
     if llm_model and "ninja" in llm_model.lower():
 
@@ -114,18 +115,32 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
             )
 
         # Facts mode → Ninja APIs (weather, definitions, general facts via Wikipedia)
+=======
+    # ── Ninja engine: data modes use Ninja, rewrite modes use local Ollama ─────
+    if llm_model and "ninja" in llm_model.lower():
+        # Facts mode → pull a real Ninja fact
+>>>>>>> Stashed changes
         if mode == "Facts":
             if re.search(
                 r"\b(weather|temperature|temp|rain|humidity|forecast|hot|cold|degrees)\b",
                 text, re.IGNORECASE
             ) and city.strip():
                 return ninja.format_weather(ninja.get_weather(city.strip()))
+<<<<<<< Updated upstream
             m_def = re.match(
                 r"^\s*(define|meaning of|what does|what is)\s+\"?(\w+)\"?\s*\??$",
                 text, re.IGNORECASE
             )
             if m_def:
                 word = m_def.group(2)
+=======
+            m = re.match(
+                r"^\s*(define|meaning of|what does|what is)\s+\"?(\w+)\"?\s*\??$",
+                text, re.IGNORECASE
+            )
+            if m:
+                word = m.group(2)
+>>>>>>> Stashed changes
                 defs = ninja.get_word_definition(word)
                 lines = [f"\U0001f4d6  {word.title()}"]
                 for d in defs[:3]:
@@ -136,6 +151,7 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
                     if ex:
                         lines.append(f'  e.g. "{ex}"')
                 return "\n".join(lines)
+<<<<<<< Updated upstream
             # General: try Wikipedia, then DuckDuckGo
             topic   = _extract_topic(text)
             context = _gather_context(topic)
@@ -167,6 +183,30 @@ def process(user_input: str, mode: str = "Auto", llm_model: str = None, city: st
         context = _gather_context(topic)
         return f"\U0001f4ac  {topic.title()}\n\n{context}" if context \
                else f"🥷  No results found for '{topic}'."
+=======
+            # General fact: enrich with Wikipedia then answer via local model
+            topic   = _extract_topic(text)
+            context = _gather_context(topic)
+            return gemini.facts(text, context=context, model=None)
+
+        # HumanRewrite / Summarize / Auto → Ninja can't rewrite, use local Ollama
+        if mode in ("HumanRewrite", "Summarize"):
+            return gemini.humanize(text, model=None) if mode == "HumanRewrite" \
+                   else gemini.summarize(text, model=None)
+
+        # Ask mode → Wikipedia context + local Ollama answer
+        if mode == "Ask":
+            topic   = _extract_topic(text)
+            context = _gather_context(topic) if len(topic) > 4 else ""
+            return gemini.ask(text, context=context, model=None)
+
+        # Auto → detect and route
+        local_mode = gemini.detect_mode_local(text)
+        context = ""
+        if local_mode in ("Ask", "Facts"):
+            context = _gather_context(_extract_topic(text))
+        return gemini.smart_respond(text, context=context, model=None)
+>>>>>>> Stashed changes
 
     # ── Auto: single smart call (no pre-classification) ──────────────────────────
     if mode == "Auto":

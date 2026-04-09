@@ -158,17 +158,36 @@ class HumanizerPanel(QWidget):
         self._populate_models()
         
     def _populate_models(self):
+<<<<<<< Updated upstream
         self._model_combo.clear()
 
         preferred = ["processauth-llama", "processauth-gemma"]
         models    = ollama_client.fetch_local_models()
         ollama_up = len(models) > 0
 
+=======
+        models = ollama_client.fetch_local_models()
+        if not models:
+            self._model_combo.addItem("llama3.2:latest")
+        else:
+            for m in models:
+                self._model_combo.addItem(m)
+        self._populate_models()
+        
+    def _populate_models(self):
+        self._model_combo.clear()
+        
+        # Preferred custom-trained models first
+        preferred = ["processauth-llama", "processauth-gemma"]
+        
+        models = ollama_client.fetch_local_models()
+>>>>>>> Stashed changes
         # Put custom trained models at the top
         for name in preferred:
             if name in models:
                 self._model_combo.addItem(f"✦ Custom Trained · {name}")
                 models.remove(name)
+<<<<<<< Updated upstream
 
         # Remaining Ollama models
         for m in models:
@@ -178,6 +197,14 @@ class HumanizerPanel(QWidget):
         if not ollama_up:
             self._model_combo.addItem("⚠  Ollama offline — start it first")
 
+=======
+        # Remaining Ollama models
+        for m in models:
+            self._model_combo.addItem(m)
+        # Fallback if Ollama is empty
+        if self._model_combo.count() == 0:
+            self._model_combo.addItem("llama3.2:latest")
+>>>>>>> Stashed changes
         # Cloud option always at the end
         self._model_combo.addItem("🥷 Ninja")
 

@@ -1348,6 +1348,7 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11434
 2026-04-07 10:55:00 | INFO     | main | Consent accepted. Launching dashboard.
 2026-04-07 10:55:00 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
 2026-04-07 10:55:30 | ERROR    | ai.ninja_client | Ninja paraphrase HTTP 404: 404 Client Error: Not Found for url: https://api.api-ninjas.com/v1/paraphrase
+<<<<<<< Updated upstream
 2026-04-07 11:03:16 | INFO     | main | Consent accepted. Launching dashboard.
 2026-04-07 11:03:17 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
 2026-04-07 11:04:46 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
@@ -1373,3 +1374,9 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11434
 2026-04-07 15:47:00 | WARNING  | ai.ollama_client | Could not fetch Ollama models: HTTPConnectionPool(host='127.0.0.1', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=11434): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
 2026-04-07 15:51:39 | INFO     | main | Consent accepted. Launching dashboard.
 2026-04-07 15:51:40 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+=======
+>>>>>>> Stashed changes
+2026-04-09 12:24:34 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-09 12:24:34 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-09 12:25:26 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-09 12:25:26 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
