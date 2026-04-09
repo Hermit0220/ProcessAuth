@@ -289,7 +289,7 @@ class Dashboard(QMainWindow):
         btn_close = QPushButton()
         btn_close.setFixedSize(30, 30)
         btn_close.setCursor(Qt.PointingHandCursor)
-        target_path = os.path.abspath("assets/close.png").replace("\\", "/")
+        target_path = os.path.abspath("assets/close.svg").replace("\\", "/")
         btn_close.setStyleSheet(f"""
             QPushButton {{
                 background: rgba(239,68,68,0.12);

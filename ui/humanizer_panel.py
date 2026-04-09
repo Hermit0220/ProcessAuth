@@ -303,6 +303,8 @@ class HumanizerPanel(QWidget):
 
     def _populate_models(self) -> None:
         self._model_combo.clear()
+        
+        # 1. Local Custom Trained
         preferred = ["processauth-llama", "processauth-gemma"]
         models    = ollama_client.fetch_local_models()
         ollama_up = len(models) > 0
@@ -311,11 +313,18 @@ class HumanizerPanel(QWidget):
             if name in models:
                 self._model_combo.addItem(f"✦ Custom Trained · {name}")
                 models.remove(name)
+                
+        # 2. Local Standard Ollama
         for m in models:
             self._model_combo.addItem(m)
         if not ollama_up:
             self._model_combo.addItem("⚠  Ollama offline — start it first")
-        self._model_combo.addItem("🥷 Ninja")
+            
+        # 3. Cloud APIs
+        self._model_combo.insertSeparator(self._model_combo.count())
+        self._model_combo.addItem("☁  Gemini 2.0 Flash")
+        self._model_combo.addItem("☁  Groq (llama-3.3-70b)")
+        self._model_combo.addItem("🥷  Ninja")
 
     def _build_input_card(self) -> QFrame:
         card = _glass_card()

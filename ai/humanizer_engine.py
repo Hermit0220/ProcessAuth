@@ -153,26 +153,55 @@ def process(user_input: str, mode: str = "Auto",
         return f"\U0001f4ac  {topic.title()}\n\n{context}" if context \
                else f"🥷  No results found for '{topic}'."
 
-    # ── Local Ollama engine ────────────────────────────────────────────────────
-    # Auto: detect intent then route to the right method
+    # ── AI Model Engine Selection ──────────────────────────────────────────────
+    from ai import ollama_client as ollama
+    from ai import gemini_client as gemini
+    from ai import groq_client as groq
+    
+    model_lower = llm_model.lower()
+    is_gemini = "gemini" in model_lower
+    is_groq = "groq" in model_lower
+    
+    if is_gemini:
+        target = gemini
+    elif is_groq:
+        target = groq
+    else:
+        target = ollama
+        
+    def _run(func_name: str, *args, **kwargs) -> str:
+        """Call the target engine function, handling kwarg differences."""
+        func = getattr(target, func_name, None)
+        if not func:
+            func = getattr(target, "humanize")
+        if target == ollama:
+            return func(*args, model=llm_model, **kwargs)
+        return func(*args, **kwargs)
+
+    # ── AI Processing ──────────────────────────────────────────────────────────
     if mode == "Auto":
+        # Always use local heuristic to avoid wasting API calls on detection
         local_mode = ollama.detect_mode_local(text)
-        context = ""
-        if local_mode in ("Ask", "Facts"):
-            topic   = _extract_topic(text)
-            context = _gather_context(topic)
-        return ollama.smart_respond(text, context=context, model=llm_model or None)
+        if local_mode == "Facts":
+            topic = _extract_topic(text)
+            return _run("facts", text, context=_gather_context(topic))
+        if local_mode == "Ask":
+            topic = _extract_topic(text)
+            return _run("ask", text, context=_gather_context(topic))
+        if local_mode == "Summarize":
+            return _run("summarize", text)
+        return _run("humanize", text)
 
     if mode == "HumanRewrite":
-        return ollama.humanize(text, model=llm_model or None)
+        return _run("humanize", text)
 
     if mode == "Summarize":
-        return ollama.summarize(text, model=llm_model or None)
+        return _run("summarize", text)
 
     if mode == "Ask":
         topic   = _extract_topic(text)
         context = _gather_context(topic) if len(topic) > 4 else ""
-        return ollama.ask(text, context=context, model=llm_model or None)
+        return _run("ask", text, context=context)
 
     if mode == "Facts":
         if re.search(
@@ -198,7 +227,7 @@ def process(user_input: str, mode: str = "Auto",
             return "\n".join(lines)
         topic   = _extract_topic(text)
         context = _gather_context(topic)
-        return ollama.facts(text, context=context, model=llm_model or None)
+        return _run("facts", text, context=context)
 
     # Fallback
-    return ollama.smart_respond(text, model=llm_model or None)
+    return _run("humanize", text)
