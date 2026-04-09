@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 
 from analysis.behavioral_engine import SessionStats
 from utils.logger import get_logger
+from ui.theme import theme_manager
 
 logger = get_logger(__name__)
 
@@ -155,7 +156,8 @@ class Dashboard(QMainWindow):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         p.setPen(Qt.NoPen)
-        p.setBrush(QBrush(QColor(3, 7, 18, 252)))
+        bg = theme_manager.get("window_bg")
+        p.setBrush(QBrush(bg))
         p.drawRect(self.rect())
 
     # ── dragging ──────────────────────────────────────────────────────────────
@@ -220,6 +222,9 @@ class Dashboard(QMainWindow):
         root.addWidget(self._tabs)
         root.addWidget(self._build_status_bar())
 
+        self.apply_theme()
+        theme_manager.theme_changed.connect(self.apply_theme)
+
     # ── title bar ─────────────────────────────────────────────────────────────
 
     def _build_title_bar(self) -> QWidget:
@@ -281,26 +286,43 @@ class Dashboard(QMainWindow):
         """)
         btn_min.clicked.connect(self.showMinimized)
 
-        btn_close = QPushButton("✕")
+        btn_close = QPushButton()
         btn_close.setFixedSize(30, 30)
         btn_close.setCursor(Qt.PointingHandCursor)
-        btn_close.setStyleSheet("""
-            QPushButton {
+        target_path = os.path.abspath("assets/close.png").replace("\\", "/")
+        btn_close.setStyleSheet(f"""
+            QPushButton {{
                 background: rgba(239,68,68,0.12);
-                color: #ef4444;
                 border: 1px solid rgba(239,68,68,0.25);
                 border-radius: 8px;
-                font-size: 12px;
-                font-weight: 700;
-            }
-            QPushButton:hover {
+                image: url("{target_path}");
+                padding: 8px;
+            }}
+            QPushButton:hover {{
                 background: rgba(239,68,68,0.28);
-                color: #ffffff;
                 border-color: #ef4444;
-            }
-            QPushButton:pressed { background: #dc2626; color:#fff; }
+            }}
+            QPushButton:pressed {{ background: #dc2626; }}
         """)
         btn_close.clicked.connect(self._safe_close)
+
+        # ── Theme toggle button ────────────────────────────────────────────────
+        self._btn_theme = QPushButton("☀")
+        self._btn_theme.setFixedSize(30, 30)
+        self._btn_theme.setCursor(Qt.PointingHandCursor)
+        self._btn_theme.setToolTip("Toggle Light / Dark mode")
+        self._btn_theme.setStyleSheet("""
+            QPushButton {
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 8px;
+                font-size: 14px;
+                color: #f1c40f;
+            }
+            QPushButton:hover { background: rgba(255,255,255,0.18); }
+            QPushButton:pressed { background: rgba(255,255,255,0.05); }
+        """)
+        self._btn_theme.clicked.connect(self._on_theme_toggle)
 
         lay.addWidget(icon)
         lay.addWidget(title)
@@ -309,10 +331,76 @@ class Dashboard(QMainWindow):
         lay.addWidget(self._status_pill)
         lay.addWidget(self._timer_label)
         lay.addSpacing(8)
+        lay.addWidget(self._btn_theme)
+        lay.addSpacing(4)
         lay.addWidget(btn_min)
         lay.addSpacing(6)
         lay.addWidget(btn_close)
         return bar
+
+    # ── theme toggle ───────────────────────────────────────────────────────────
+
+    def _on_theme_toggle(self) -> None:
+        theme_manager.toggle()
+
+    def apply_theme(self) -> None:
+        is_dark = theme_manager.mode == "dark"
+        self.update()  # repaint background
+
+        if is_dark:
+            self._btn_theme.setText("☀")
+            self._btn_theme.setStyleSheet("""
+                QPushButton {
+                    background: rgba(255,255,255,0.08);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    border-radius: 8px; font-size: 14px; color: #f1c40f;
+                }
+                QPushButton:hover { background: rgba(255,255,255,0.18); }
+            """)
+            tab_text = "#334155"; tab_sel_text = "#06b6d4"
+            tab_bg   = "rgba(255,255,255,0.03)"
+            tab_sel  = "rgba(6,182,212,0.10)"
+            tab_bdr  = "rgba(255,255,255,0.06)"
+            tab_sel_bdr = "rgba(6,182,212,0.25)"
+            tab_hov  = "rgba(255,255,255,0.06)"; tab_hov_text = "#94a3b8"
+            sbar_bg  = "rgba(255,255,255,0.015)"; sbar_bdr = "rgba(255,255,255,0.04)"
+            sbar_col = "#1e3a4a"
+        else:
+            self._btn_theme.setText("🌙")
+            self._btn_theme.setStyleSheet("""
+                QPushButton {
+                    background: rgba(0,0,0,0.08);
+                    border: 1px solid rgba(0,0,0,0.15);
+                    border-radius: 8px; font-size: 14px; color: #334155;
+                }
+                QPushButton:hover { background: rgba(0,0,0,0.14); }
+            """)
+            tab_text = "#475569"; tab_sel_text = "#0891b2"
+            tab_bg   = "rgba(0,0,0,0.04)"
+            tab_sel  = "rgba(6,182,212,0.12)"
+            tab_bdr  = "rgba(0,0,0,0.08)"
+            tab_sel_bdr = "rgba(8,145,178,0.35)"
+            tab_hov  = "rgba(0,0,0,0.06)"; tab_hov_text = "#334155"
+            sbar_bg  = "rgba(0,0,0,0.03)"; sbar_bdr = "rgba(0,0,0,0.08)"
+            sbar_col = "#64748b"
+
+        self._tabs.setStyleSheet(f"""
+            QTabWidget::pane {{ border: none; background: transparent; }}
+            QTabBar::tab {{
+                background: {tab_bg}; color: {tab_text};
+                border: 1px solid {tab_bdr}; border-bottom: none;
+                border-radius: 8px 8px 0 0; padding: 8px 22px;
+                font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-right: 4px;
+            }}
+            QTabBar::tab:selected {{
+                background: {tab_sel}; color: {tab_sel_text};
+                border-color: {tab_sel_bdr};
+            }}
+            QTabBar::tab:hover:!selected {{ background: {tab_hov}; color: {tab_hov_text}; }}
+        """)
+        self._status_text.setStyleSheet(
+            f"font-size:10px;color:{sbar_col};background:transparent;"
+        )
 
     # ── left panel ────────────────────────────────────────────────────────────
 

@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 )
 from utils.logger import get_logger
 from ai import ollama_client
+from ui.theme import theme_manager
 
 logger = get_logger(__name__)
 
@@ -172,6 +173,8 @@ class HumanizerPanel(QWidget):
         self._dot_timer.timeout.connect(self._animate_dots)
         self._build_ui()
         self._populate_models()
+        self.apply_theme()
+        theme_manager.theme_changed.connect(self.apply_theme)
 
     # ── UI Layout ─────────────────────────────────────────────────────────────
 
@@ -557,3 +560,67 @@ class HumanizerPanel(QWidget):
             "QFrame{background:rgba(255,255,255,0.04);"
             "border:1px solid rgba(255,255,255,0.07);border-radius:14px;}"
         )
+
+    def apply_theme(self) -> None:
+        is_dark = theme_manager.mode == "dark"
+
+        if is_dark:
+            txt       = "#e2e8f0"
+            txt_muted = "#64748b"
+            box_bg    = "rgba(0,0,0,0.20)"
+            box_bdr   = "rgba(255,255,255,0.06)"
+            box_focus = "rgba(139,92,246,0.40)"
+            combo_bg  = "rgba(255,255,255,0.06)"
+            combo_bdr = "rgba(255,255,255,0.12)"
+            combo_drop= "#0f172a"
+            lbl_sec   = "#1e3a4a"
+        else:
+            txt       = "#1e293b"
+            txt_muted = "#475569"
+            box_bg    = "rgba(255,255,255,0.85)"
+            box_bdr   = "rgba(0,0,0,0.12)"
+            box_focus = "rgba(124,58,237,0.45)"
+            combo_bg  = "rgba(255,255,255,0.80)"
+            combo_bdr = "rgba(0,0,0,0.12)"
+            combo_drop= "#f8fafc"
+            lbl_sec   = "#64748b"
+
+        box_style = f"""
+            QTextEdit {{
+                background: {box_bg}; border: 1px solid {box_bdr};
+                border-radius: 10px; color: {txt}; font-size: 13px;
+                font-family: 'Segoe UI', 'Inter', sans-serif; padding: 10px;
+            }}
+            QTextEdit:focus {{ border-color: {box_focus}; }}
+        """
+        self._input_box.setStyleSheet(box_style)
+        self._output_box.setStyleSheet(box_style.replace(":focus", ":disabled"))
+
+        combo_style = f"""
+            QComboBox {{
+                background: {combo_bg}; border: 1px solid {combo_bdr};
+                border-radius: 10px; padding: 0 12px; color: {txt};
+                font-size: 12px; font-weight: 600;
+            }}
+            QComboBox::drop-down {{ border: none; width: 20px; }}
+            QComboBox QAbstractItemView {{
+                background: {combo_drop}; border: 1px solid {combo_bdr};
+                selection-background-color: rgba(139,92,246,0.25); color: {txt};
+            }}
+        """
+        self._mode_combo.setStyleSheet(combo_style)
+        self._model_combo.setStyleSheet(combo_style)
+
+        # Section labels
+        for w in self.findChildren(QLabel):
+            if w.text() in (
+                "YOUR INPUT", "RESULT", "QUICK ACTIONS",
+                "0 chars", "",
+            ) or w.text().endswith(" chars") or w.text().endswith(" words"):
+                continue  # skip dynamic labels
+            cur = w.styleSheet()
+            if "letter-spacing:2px" in cur or "letter-spacing: 2px" in cur:
+                w.setStyleSheet(
+                    f"font-size:9px;font-weight:700;color:{lbl_sec};"
+                    "letter-spacing:2px;background:transparent;border:none;"
+                )
