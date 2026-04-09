@@ -1354,3 +1354,7 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11434
 2026-04-07 10:55:00 | INFO     | main | Consent accepted. Launching dashboard.
 2026-04-07 10:55:00 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
 2026-04-07 10:55:30 | ERROR    | ai.ninja_client | Ninja paraphrase HTTP 404: 404 Client Error: Not Found for url: https://api.api-ninjas.com/v1/paraphrase
+2026-04-09 17:54:55 | INFO     | main | Consent accepted. Launching dashboard.
+2026-04-09 17:54:55 | INFO     | database.db | Database opened: C:\Users\ThinkPad\Desktop\Projects\ProcessAuth\data\processauth.db
+2026-04-09 17:55:20 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
+2026-04-09 17:55:27 | ERROR    | ai.ninja_client | Ninja facts error: 400 Client Error: Bad Request for url: https://api.api-ninjas.com/v1/facts?limit=1
